@@ -1,0 +1,9 @@
+# --- Logging options ---
+use_tensorboard: True
+save_model: False # Save the models to disk
+local_results_path: "results"
+
+# --- RL hyperparameters ---
+gamma: 0.99
+lr: 0.0005
+batch_size: 64

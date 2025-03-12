@@ -1,0 +1,6 @@
+# --- General config  ---
+runner: "default"
+
+
+# use XXX to train
+agent_out_put_type: "action"

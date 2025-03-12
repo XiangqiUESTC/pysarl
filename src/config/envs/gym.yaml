@@ -1,0 +1,7 @@
+env: "gym"
+
+env_args:
+  game_name: "CartPole-v1"
+
+
+t_max: 2005000

@@ -1,4 +1,4 @@
-from .default_runner import DefaultRunner
+from .episode_runner import EpisodeRunner
 REGISTRY = {
-    "default": DefaultRunner
+    "default": EpisodeRunner
 }

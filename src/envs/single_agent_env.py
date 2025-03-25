@@ -18,13 +18,12 @@ class SingleAgentEnv(ABC):
         pass
 
     @abstractmethod
-    def get_state_shape(self):
-        """ 获取状态的形状 """
+    def get_max_episode_steps(self):
         pass
 
     @abstractmethod
-    def get_action_shape(self):
-        """ 获取动作的形状 """
+    def get_scheme(self):
+        pass
 
     @abstractmethod
     def render(self):
@@ -34,12 +33,4 @@ class SingleAgentEnv(ABC):
     @abstractmethod
     def close(self):
         """  """
-        pass
-
-    @abstractmethod
-    def get_env_info(self):
-        pass
-
-    @abstractmethod
-    def get_max_episode_steps(self):
         pass

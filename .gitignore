@@ -6,5 +6,5 @@ results
 .idea
 
 # Test files
-.\**\test.py
+**/test.py
 

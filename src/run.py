@@ -7,7 +7,6 @@ from types import SimpleNamespace as SN
 from utils.logging import myLogger
 
 from runners import REGISTRY as runner_REGISTRY
-from controllers import REGISTRY as controller_REGISTRY
 
 
 def run(_run, _config, _log):
@@ -33,18 +32,6 @@ def run(_run, _config, _log):
 def training(args, logger):
     # 初始化runner
     runner = runner_REGISTRY[args.runner](args, logger)
-
-    # 获取环境信息
-    env_info = runner.env.get_env_info()
-    # 配置scheme
-    scheme = {
-        "state_info": {"shape": env_info['state_shape'], "dim": env_info['state_dim']},
-        "action_info": {"shape": env_info['action_shape'], "dim": env_info['action_dim']},
-        "max_step": runner.env.get_max_episode_steps()
-    }
-    controller = controller_REGISTRY[args.controller](args, scheme)
-
-    runner.setup(scheme, controller)
 
     runner.run()
 

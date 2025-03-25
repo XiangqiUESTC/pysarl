@@ -23,7 +23,7 @@ class EpsilonGreedyActionSelector:
             self.epsilon = self.epsilon_schedule.eval(t_env)
 
         # greedy action select strategy
-        rand_num = torch.rand(*agent_output.shape[0:-1], 1)
+        rand_num = torch.rand(*(agent_output.shape[0:-1]))
 
         explore = (rand_num < self.epsilon).long()
 
@@ -34,7 +34,7 @@ class EpsilonGreedyActionSelector:
         distribution = Categorical(probabilities)
 
         random_action = distribution.sample(explore.shape)
-        max_q_action = agent_output.max(dim=-1)[1].unsqueeze(-1)
+        max_q_action = agent_output.max(dim=-1)[1]
 
         picked_actions = random_action * explore + (1 - explore) * max_q_action
         return picked_actions.tolist()

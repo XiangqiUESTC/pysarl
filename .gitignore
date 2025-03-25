@@ -5,3 +5,6 @@ results
 # IntelliJ project files
 .idea
 
+# Test files
+.\**\test.py
+

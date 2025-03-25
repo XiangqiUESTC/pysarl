@@ -1,0 +1,16 @@
+# --- DQN specific parameters ---
+
+# --- args for sarsa controllers
+controller: "value"
+critic: "q_table"
+q_init_val: 0.0
+action_selector: "epsilon_greedy"
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 50000
+
+runner: "default"
+
+
+# use XXX to train
+agent_out_put_type: "value"

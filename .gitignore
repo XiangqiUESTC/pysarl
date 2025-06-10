@@ -1,1 +1,11 @@
+### Example user template template
+results
 
+
+# IntelliJ project files
+.idea
+
+# Test files
+**/test.py
+
+**/__pycache__/**

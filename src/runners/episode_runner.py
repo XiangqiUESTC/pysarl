@@ -14,23 +14,38 @@ class EpisodeRunner(AbstractRunner):
         self.reset()
         terminated = self.env.terminated
 
+        # 状态转移字典
+        transaction_list = {
+            "rewards": [],
+            "states": [],
+            "actions": [],
+            "terminated": [],
+        }
+
         while not terminated:
             # 选择动作？
             state = self.env.get_state()
-            print(f"state是{state}")
+
             # 即使是一个state也要做batch化的处理，这是统一的要求
             batch_state = torch.unsqueeze(state, 0)
             actions = self.controller.select_action(batch_state, self.t_env, self.t, test_mode=test_mode)
-            print(f"actions是{actions}")
-            # 执行动作，actions是针对一个batch的state返回的所有行动的集合，所以这里要取actions[0]
-            state, reward, terminated, info = self.env.step(actions[0])
 
-            print(f"reward是{reward}")
-            print(f"state是{state}")
-            print(f"terminated是{terminated}")
-            # 把交互数据放入replay buffer中
-            exit()
+            transaction_list["rewards"].append(state)
+            transaction_list["actions"].append(actions[0])
+
+            # 执行动作，actions是针对一个batch的state返回的所有行动的集合，所以这里要取actions[0]
+            state, reward, done, info = self.env.step(actions[0])
+
+            transaction_list["states"].append(reward)
+            transaction_list["terminated"].append(done)
+
             self.t += 1
 
+        transaction_tensor = {}
+
+        for key, value in transaction_list.items():
+            transaction_tensor[key] = torch.stack(value)
+
         self.t_env += self.t
-        pass
+
+        return transaction_tensor

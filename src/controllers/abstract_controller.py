@@ -13,21 +13,21 @@ class AbstractController(ABC):
         method to select action
     """
     @abstractmethod
-    def select_action(self, ):
+    def select_action(self, batch, t_env, t, test_mode=False):
         pass
 
     """
         method to calculate agent output
     """
     @abstractmethod
-    def forward(self,):
+    def forward(self, states):
         pass
 
     """
         inner method for building agent
     """
     @abstractmethod
-    def _build_agent(self, input_shape):
+    def _build_agent(self):
         pass
 
     @abstractmethod

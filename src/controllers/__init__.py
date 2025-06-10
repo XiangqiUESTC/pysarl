@@ -1,6 +1,4 @@
-from .policy_controller import PolicyController
-from .value_controller import ValueController
+from .basic_controller import BasicController
 REGISTRY = {
-    'policy': PolicyController,
-    'value': ValueController
+    'basic_controller': BasicController
 }

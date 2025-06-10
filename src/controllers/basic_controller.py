@@ -5,8 +5,8 @@ from components.critics import REGISTRY as CRITIC_REGISTRY
 from components.action_selectors.action_selectors import REGISTRY as ACTION_SELECTOR_REGISTRY
 
 
-# the controllers for value-based
-class ValueController(AbstractController):
+# the controllers for vanilla value-based and policy-base rl algorithm
+class BasicController(AbstractController):
     def __init__(self, args, scheme):
         super().__init__(args, scheme)
 
@@ -30,17 +30,15 @@ class ValueController(AbstractController):
     def select_action(self, batch, t_env, t, test_mode=False):
         flat_states = self._build_inputs(batch)
         agents_outputs = self.forward(flat_states)
-        print(f"agent_outputs是{agents_outputs}")
         return self.action_selector.select_action(agents_outputs, t_env, t, test_mode=test_mode)
 
-    def forward(self, flat_states):
-        return self.agent(flat_states)
+    def forward(self, states):
+        return self.agent(states)
 
     def _build_agent(self):
         self.agent = CRITIC_REGISTRY[self.args.critic](self.args, self.scheme)
 
     def _build_inputs(self, batch):
-        print(f"batch是{batch}")
         batch = torch.tensor(batch, dtype=torch.float)
         flat_states = torch.flatten(batch, start_dim=-self.state_dim)
         return flat_states

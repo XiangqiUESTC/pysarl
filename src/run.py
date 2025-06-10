@@ -2,23 +2,30 @@ import os
 from os.path import abspath
 from os.path import dirname
 import pprint
-from types import SimpleNamespace as SN
 
 from utils.logging import myLogger
+from utils.functions import dict_to_namespace
 
 from runners import REGISTRY as runner_REGISTRY
 
 
-def run(_run, _config, _log):
-    args = dict_to_namespace(_config)
+def run(ex_run, config, log):
+    """
+        Description: 在正式开始实验前再做一些准备，如装配tensorboard
+        Arguments:
+            ex_run: 
+            config: 
+            log: 
+    """
+    args = dict_to_namespace(config)
 
-    _log.info("实验参数为:")
-    experiment_params = pprint.pformat(_config,
+    log.info("实验参数为:")
+    experiment_params = pprint.pformat(config,
                                        indent=4,
                                        width=1)
-    _log.info("\n\n" + experiment_params + "\n")
+    log.info("\n\n" + experiment_params + "\n")
 
-    logger = myLogger(_log)
+    logger = myLogger(log)
 
     # 如果要使用tensorboard，在日志实例中装配
     if args.use_tensorboard:
@@ -30,26 +37,14 @@ def run(_run, _config, _log):
 
 
 def training(args, logger):
+    """
+        Description: 封装强化学习所有流程的函数
+        Arguments:
+            args: args是一个SimpleNamespace对象，由sacred配置项转化而来，它控制整个强化学习流程的各个方面
+            logger: logger是日志器对象
+    """
     # 初始化runner
     runner = runner_REGISTRY[args.runner](args, logger)
 
+    # runner控制env和agent交互，不同的runner有不同的控制粒度
     runner.run()
-
-
-# 递归地把字典的键名转化为对象的属性名
-def dict_to_namespace(d):
-    if isinstance(d, dict):
-        # 创建一个新的字典来存储转换后的结果
-        new_dict = {}
-        for key, value in d.items():
-            # 递归处理嵌套的字典或列表
-            new_dict[key] = dict_to_namespace(value)
-        # 将新字典转换为 SimpleNamespace
-        return SN(**new_dict)
-    elif isinstance(d, list):
-        # 递归处理列表中的每个元素
-        return [dict_to_namespace(item) for item in d]
-    else:
-        # 如果不是字典或列表，直接返回值
-        return d
-

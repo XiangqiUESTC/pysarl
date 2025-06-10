@@ -46,7 +46,6 @@ class Gym(SingleAgentEnv):
         state, reward, terminated, info, *_ = self.game.step(action)
         self.set_state(state)
         reward = torch.tensor(reward, dtype=torch.float)
-        terminated = torch.tensor(terminated, dtype=torch.float)
         return self.get_state(), reward, terminated, info
 
     def reset(self):

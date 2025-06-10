@@ -1,7 +1,7 @@
 # --- DQN specific parameters ---
 
 # --- args for q_learning controllers
-controller: "value"
+controller: "basic_controller"
 critic: "q_table"
 q_init_val: 0.0
 action_selector: "epsilon_greedy"

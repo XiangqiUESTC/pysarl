@@ -1,7 +1,7 @@
 # --- DQN specific parameters ---
 
 # --- args for DQN controllers
-controller: "value"
+controller: "basic_controller"
 critic: "simple_critic"
 hidden_size: 256
 action_selector: "epsilon_greedy"

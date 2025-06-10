@@ -1,5 +1,7 @@
 import gymnasium as gym
 import numpy as np
+import torch
+
 from .single_agent_env import SingleAgentEnv
 from .specs.scheme import Scheme
 
@@ -17,8 +19,13 @@ class Gym(SingleAgentEnv):
             self.game = gym.make(self.game_name)
         else:
             self.game = gym.make(self.game_name)
+        # state设置为None
         self.state = None
+        # 状态是否结束设置为None
         self.terminated = None
+        # 获取scheme
+        self.scheme = self.get_scheme()
+        # 重置环境
         self.reset()
 
     def get_scheme(self):
@@ -37,24 +44,37 @@ class Gym(SingleAgentEnv):
 
     def step(self, action):
         state, reward, terminated, info, *_ = self.game.step(action)
-        self.state = state
+        self.set_state(state)
         return state, reward, terminated, info
 
     def reset(self):
-        self.state, *_ = self.game.reset()
+        # 重置游戏，将self.state设置为初始状态
+        state, *_ = self.game.reset()
+        # 设置state
+        self.set_state(state)
+        # 将游戏结束设置为False
         self.terminated = False
+
+    # 统一一下表达，如果state没有维度，那么给它加一个维度
+    def set_state(self, state):
+        if not isinstance(state, np.ndarray):
+            state = np.array(state)
+        if len(state.shape) == 0:
+            state = np.expand_dims(state, axis=0)
+        state = torch.tensor(state)
+        self.state = state
 
     def get_state(self):
         return self.state
 
-    # 用来获得一个space的信息，space是gym定义的几种基本的space的类型
+    # 私有方法，用来获得一个space的信息，space是gym定义的几种基本的space的类型
     def _get_space_info(self, space):
         if isinstance(space, gym.spaces.Discrete):
             # 如果是离散类型，返回discrete字符和离散的个数
             return "discrete", space.n, None
         elif isinstance(space, gym.spaces.Box):
             # 如果是连续类型，continuous字符和维度
-            return "continuous", None, space.shape,
+            return "continuous", None, torch.tensor(space.shape),
         else:
             # 还没有处理其他类型space的代码，遇到其它类型的代码就抛异常
             raise NotImplementedError(

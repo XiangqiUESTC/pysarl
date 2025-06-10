@@ -1,4 +1,4 @@
-from .epsilon_schedules import DeclineThenFlat
+from .epsilon_schedules.decline_then_flat import DeclineThenFlat
 from torch.distributions import Categorical
 import torch
 

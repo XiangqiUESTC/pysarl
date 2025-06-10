@@ -1,9 +1,8 @@
-import numpy as np
 import torch
 
 from .abstract_controller import AbstractController
-from modules.critic import REGISTRY as CRITIC_REGISTRY
-from components.action_selectors import REGISTRY as ACTION_SELECTOR_REGISTRY
+from components.critics import REGISTRY as CRITIC_REGISTRY
+from components.action_selectors.action_selectors import REGISTRY as ACTION_SELECTOR_REGISTRY
 
 
 # the controllers for value-based
@@ -41,8 +40,7 @@ class ValueController(AbstractController):
         self.agent = CRITIC_REGISTRY[self.args.critic](self.args, self.scheme)
 
     def _build_inputs(self, batch):
+        print(f"batch是{batch}")
         batch = torch.tensor(batch, dtype=torch.float)
         flat_states = torch.flatten(batch, start_dim=-self.state_dim)
-        if self.scheme.state_space_type == 'discrete':
-            flat_states.unsqueeze_(1)
         return flat_states

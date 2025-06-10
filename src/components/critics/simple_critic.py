@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
+import torch
 
 
 # simple_full_connect_actor
@@ -8,7 +8,7 @@ class SimpleCritic(nn.Module):
     def __init__(self, args, scheme):
         action_size = scheme.discrete_action_size
         if scheme.state_space_type == 'continuous':
-            state_size = np.prod(scheme.continuous_state_shape)
+            state_size = torch.prod(scheme.continuous_state_shape)
         elif scheme.state_space_type == 'discrete':
             state_size = 1
         else:

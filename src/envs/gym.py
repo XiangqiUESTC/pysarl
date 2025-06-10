@@ -45,7 +45,9 @@ class Gym(SingleAgentEnv):
     def step(self, action):
         state, reward, terminated, info, *_ = self.game.step(action)
         self.set_state(state)
-        return state, reward, terminated, info
+        reward = torch.tensor(reward, dtype=torch.float)
+        terminated = torch.tensor(terminated, dtype=torch.float)
+        return self.get_state(), reward, terminated, info
 
     def reset(self):
         # 重置游戏，将self.state设置为初始状态

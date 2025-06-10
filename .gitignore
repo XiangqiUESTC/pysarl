@@ -8,3 +8,5 @@ results
 # Test files
 **/test.py
 
+**/__pycache__/**
+

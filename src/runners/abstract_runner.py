@@ -19,6 +19,7 @@ class AbstractRunner(ABC):
         """
         self.env = None
         self.controller = None
+        self.scheme = None
 
         self.args = args
         self.logger = logger
@@ -43,6 +44,8 @@ class AbstractRunner(ABC):
 
         # 获取环境scheme，用于初始化controller
         scheme = self.env.get_scheme()
+
+        self.scheme = scheme
 
         # TODO 在这里要检查算法和环境是否相匹配
 

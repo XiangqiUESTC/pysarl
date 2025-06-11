@@ -2,6 +2,9 @@
 
 # --- args for DQN controllers
 controller: "basic_controller"
+buffer: "basic_buffer"
+learner: "dqn"
+
 critic: "simple_critic"
 hidden_size: 256
 action_selector: "epsilon_greedy"
@@ -9,7 +12,7 @@ epsilon_start: 1.0
 epsilon_finish: 0.05
 epsilon_anneal_time: 50000
 
-runner: "default"
+runner: "episode"
 
 
 # use XXX to train

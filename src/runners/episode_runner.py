@@ -15,7 +15,7 @@ class EpisodeRunner(AbstractRunner):
         terminated = self.env.terminated
 
         # 状态转移字典
-        transaction_list = {
+        transaction = {
             "rewards": [],
             "states": [],
             "actions": [],
@@ -30,22 +30,17 @@ class EpisodeRunner(AbstractRunner):
             batch_state = torch.unsqueeze(state, 0)
             actions = self.controller.select_action(batch_state, self.t_env, self.t, test_mode=test_mode)
 
-            transaction_list["rewards"].append(state)
-            transaction_list["actions"].append(actions[0])
+            transaction["rewards"].append(state)
+            transaction["actions"].append(actions[0])
 
             # 执行动作，actions是针对一个batch的state返回的所有行动的集合，所以这里要取actions[0]
-            state, reward, done, info = self.env.step(actions[0])
+            state, reward, terminated, info = self.env.step(actions[0])
 
-            transaction_list["states"].append(reward)
-            transaction_list["terminated"].append(done)
+            transaction["states"].append(reward)
+            transaction["terminated"].append(terminated)
 
             self.t += 1
 
-        transaction_tensor = {}
-
-        for key, value in transaction_list.items():
-            transaction_tensor[key] = torch.stack(value)
-
         self.t_env += self.t
 
-        return transaction_tensor
+        return transaction

@@ -39,6 +39,5 @@ class BasicController(AbstractController):
         self.agent = CRITIC_REGISTRY[self.args.critic](self.args, self.scheme)
 
     def _build_inputs(self, batch):
-        batch = torch.tensor(batch, dtype=torch.float)
         flat_states = torch.flatten(batch, start_dim=-self.state_dim)
         return flat_states

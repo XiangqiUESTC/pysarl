@@ -7,6 +7,8 @@ from utils.logging import myLogger
 from utils.functions import dict_to_namespace
 
 from runners import REGISTRY as runner_REGISTRY
+from buffers import REGISTRY as buffer_REGISTRY
+from learners import REGISTER as learner_REGISTRY
 
 
 def run(ex_run, config, log):
@@ -46,5 +48,27 @@ def training(args, logger):
     # 初始化runner
     runner = runner_REGISTRY[args.runner](args, logger)
 
-    # runner控制env和agent交互，不同的runner有不同的控制粒度
-    runner.run()
+    # 初始化buffer
+    buffer = buffer_REGISTRY[args.buffer](args, logger)
+
+    # 初始化learner
+    learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller,logger)
+
+    # 跑满t_max步为止
+    while runner.t_env <= args.t_max:
+
+        # runner控制env和agent交互，不同的runner有不同的控制粒度
+        transaction = runner.run()
+
+        # buffer收集数据
+        buffer.insert(transaction)
+
+        # 如果满足采样条件，就采样并学习
+        if buffer.can_sample():
+            # 采样方法
+            batch = buffer.sample()
+            # 学习方法
+            learner.learn(batch)
+
+
+    print("hhh")

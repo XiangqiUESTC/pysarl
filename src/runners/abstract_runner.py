@@ -28,6 +28,7 @@ class AbstractRunner(ABC):
         self.t_env = 0
         # 在一个episode中的交互步数
         self.t = 0
+        self.episode = 0
 
         # 装配env和controller
         self.setup()

@@ -37,7 +37,7 @@ class EpsilonGreedyActionSelector:
         max_q_action = agent_output.max(dim=-1)[1]
 
         picked_actions = random_action * explore + (1 - explore) * max_q_action
-        return picked_actions.tolist()
+        return picked_actions
 
 
 REGISTRY["epsilon_greedy"] = EpsilonGreedyActionSelector

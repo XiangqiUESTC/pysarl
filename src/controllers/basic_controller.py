@@ -35,6 +35,9 @@ class BasicController(AbstractController):
     def forward(self, states):
         return self.agent(states)
 
+    def parameters(self):
+        return self.agent.parameters()
+
     def _build_agent(self):
         self.agent = CRITIC_REGISTRY[self.args.critic](self.args, self.scheme)
 

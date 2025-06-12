@@ -2,9 +2,14 @@
 use_tensorboard: True
 save_model: False # Save the models to disk
 local_results_path: "results"
+log_interval: 20
 
 # --- RL hyperparameters ---
 gamma: 0.99
-lr: 0.0005
+lr: 0.001
 batch_size: 4
 buffer_size: 64
+
+
+# device control
+use_cuda: True

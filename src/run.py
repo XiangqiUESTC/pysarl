@@ -3,7 +3,7 @@ from os.path import abspath
 from os.path import dirname
 import pprint
 
-from utils.logging import myLogger
+from utils.logger import MyLogger
 from utils.functions import dict_to_namespace
 
 from runners import REGISTRY as runner_REGISTRY
@@ -27,7 +27,7 @@ def run(ex_run, config, log):
                                        width=1)
     log.info("\n\n" + experiment_params + "\n")
 
-    logger = myLogger(log)
+    logger = MyLogger(log)
 
     # 如果要使用tensorboard，在日志实例中装配
     if args.use_tensorboard:
@@ -68,7 +68,4 @@ def training(args, logger):
             # 采样方法
             batch = buffer.sample()
             # 学习方法
-            learner.learn(batch)
-
-
-    print("hhh")
+            learner.learn(batch, runner.t_env, runner.episode)

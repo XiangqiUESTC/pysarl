@@ -5,6 +5,8 @@ controller: "basic_controller"
 buffer: "basic_buffer"
 learner: "dqn"
 
+target_update_interval: 32
+
 critic: "simple_critic"
 hidden_size: 256
 action_selector: "epsilon_greedy"

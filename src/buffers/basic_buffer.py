@@ -57,12 +57,10 @@ class BasicBuffer:
         for key, tensor_batch in sampled_data.items():
             padded_batch[key] = []
             for tensor_to_pad in tensor_batch:
-                print(f"tensor_to_pad_shape: {tensor_to_pad.shape}")
                 # 获得形状
                 pad_shape = list(tensor_to_pad.shape)
                 # 在第一个维度进行填充
                 pad_shape[0] = max_episode_length + 1 - pad_shape[0]
-                print(f"pad_shape: {pad_shape}")
                 # 创建用于填充的tensor
                 pad_tensor = torch.zeros(pad_shape, dtype=tensor_to_pad.dtype)
                 # 使用cat函数完成填充

@@ -14,32 +14,42 @@ class EpisodeRunner(AbstractRunner):
         self.reset()
         terminated = self.env.terminated
 
-        # 状态转移字典
+        # 状态转移字典 和一些必要的信息
         transaction = {
             "rewards": [],
             "states": [],
             "actions": [],
             "terminated": [],
+
+            "filled": []
         }
-
+        # 选择动作？
+        state = self.env.get_state()
         while not terminated:
-            # 选择动作？
-            state = self.env.get_state()
-
             # 即使是一个state也要做batch化的处理，这是统一的要求
             batch_state = torch.unsqueeze(state, 0)
             actions = self.controller.select_action(batch_state, self.t_env, self.t, test_mode=test_mode)
 
-            transaction["rewards"].append(state)
-            transaction["actions"].append(actions[0])
+            # 记录状态转移数据
+            transaction["states"].append(state)
+            transaction["actions"].append(actions)
+            transaction["terminated"].append(torch.tensor(terminated))
+            # 记录步长
+            transaction["filled"].append(torch.tensor(1))
 
             # 执行动作，actions是针对一个batch的state返回的所有行动的集合，所以这里要取actions[0]
-            state, reward, terminated, info = self.env.step(actions[0])
+            state, reward, terminated, info = self.env.step(actions.item())
 
-            transaction["states"].append(reward)
-            transaction["terminated"].append(terminated)
+            transaction["rewards"].append(reward)
+
+
 
             self.t += 1
+        # 记录终止信息
+        transaction["states"].append(state)
+        transaction["terminated"].append(torch.tensor(terminated))
+
+
 
         self.t_env += self.t
 

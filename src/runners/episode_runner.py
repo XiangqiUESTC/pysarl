@@ -14,6 +14,8 @@ class EpisodeRunner(AbstractRunner):
         self.reset()
         terminated = self.env.terminated
 
+        total_reward = 0
+
         # 状态转移字典 和一些必要的信息
         transaction = {
             "rewards": [],
@@ -40,17 +42,20 @@ class EpisodeRunner(AbstractRunner):
             # 执行动作，actions是针对一个batch的state返回的所有行动的集合，所以这里要取actions[0]
             state, reward, terminated, info = self.env.step(actions.item())
 
+            # 累加奖励
+            total_reward += reward
+
             transaction["rewards"].append(reward)
-
-
 
             self.t += 1
         # 记录终止信息
         transaction["states"].append(state)
         transaction["terminated"].append(torch.tensor(terminated))
 
-
-
+        self.episode += 1
         self.t_env += self.t
+
+        if self.episode % self.args.log_interval == 0:
+            self.logger.logger.info(f"第{self.episode}个episode的奖励为{total_reward}", )
 
         return transaction

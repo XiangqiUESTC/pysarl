@@ -3,7 +3,7 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 
 
-class myLogger:
+class MyLogger:
     def __init__(self, logger):
         self.writer = None
         self.logger = logger

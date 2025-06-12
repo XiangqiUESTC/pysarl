@@ -3,7 +3,6 @@
 # --- args for DQN controllers
 controller: "basic_controller"
 buffer: "basic_buffer"
-buffer_size: "64"
 learner: "dqn"
 
 critic: "simple_critic"

@@ -6,4 +6,5 @@ local_results_path: "results"
 # --- RL hyperparameters ---
 gamma: 0.99
 lr: 0.0005
-batch_size: 64
+batch_size: 4
+buffer_size: 64

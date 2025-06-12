@@ -31,5 +31,9 @@ class AbstractController(ABC):
         pass
 
     @abstractmethod
+    def parameters(self):
+        pass
+
+    @abstractmethod
     def _build_inputs(self, batch):
         pass

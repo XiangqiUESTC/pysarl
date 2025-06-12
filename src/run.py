@@ -49,7 +49,7 @@ def training(args, logger):
     runner = runner_REGISTRY[args.runner](args, logger)
 
     # 初始化buffer
-    buffer = buffer_REGISTRY[args.buffer](args, logger)
+    buffer = buffer_REGISTRY[args.buffer](args, runner.scheme)
 
     # 初始化learner
     learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller,logger)

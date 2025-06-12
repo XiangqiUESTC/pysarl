@@ -10,7 +10,7 @@ from copy import deepcopy
 import yaml
 
 # 框架其他模块
-from utils.logging import get_logger
+from utils.logger import get_logger
 from utils.functions import recursive_dict_update
 from utils.functions import get_config
 from run import run

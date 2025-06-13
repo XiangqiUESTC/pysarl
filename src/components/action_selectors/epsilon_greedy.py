@@ -2,10 +2,8 @@ from .epsilon_schedules.decline_then_flat import DeclineThenFlat
 from torch.distributions import Categorical
 import torch
 
-REGISTRY = {}
 
-
-class EpsilonGreedyActionSelector:
+class EpsilonGreedy:
     def __init__(self, args):
         self.args = args
 
@@ -40,4 +38,4 @@ class EpsilonGreedyActionSelector:
         return picked_actions
 
 
-REGISTRY["epsilon_greedy"] = EpsilonGreedyActionSelector
+

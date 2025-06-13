@@ -1,8 +1,8 @@
 import torch
 
 from .abstract_controller import AbstractController
-from components.critics import REGISTRY as CRITIC_REGISTRY
-from components.action_selectors.action_selectors import REGISTRY as ACTION_SELECTOR_REGISTRY
+from components.agents import REGISTRY as agent_REGISTRY
+from components.action_selectors import REGISTRY as action_selector_REGISTRY
 
 
 # the controllers for vanilla value-based and policy-base rl algorithm
@@ -25,7 +25,7 @@ class BasicController(AbstractController):
         # 构建agent
         self._build_agent()
         # 初始化动作选择器
-        self.action_selector = ACTION_SELECTOR_REGISTRY[args.action_selector](args)
+        self.action_selector = action_selector_REGISTRY[args.action_selector](args)
 
     def select_action(self, batch, t_env, t, test_mode=False):
         flat_states = self._build_inputs(batch)
@@ -39,7 +39,7 @@ class BasicController(AbstractController):
         return self.agent.parameters()
 
     def _build_agent(self):
-        self.agent = CRITIC_REGISTRY[self.args.critic](self.args, self.scheme)
+        self.agent = agent_REGISTRY[self.args.agent](self.args, self.scheme)
 
     def _build_inputs(self, batch):
         flat_states = torch.flatten(batch, start_dim=-self.state_dim)

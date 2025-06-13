@@ -1,6 +1,11 @@
-# --- General config  ---
-runner: "default"
+runner: "episode"
+controller: "basic_controller"
+buffer: "basic_buffer"
+learner: "reinforce"
 
+batch_size: 4
+buffer_size: 4
 
-# use XXX to train
-agent_out_put_type: "distribution"
+agent: "simple_actor"
+hidden_size: 256
+action_selector: "policy_distribution"

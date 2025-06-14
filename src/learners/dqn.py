@@ -67,7 +67,8 @@ class DQN:
         self.target_controller.agent.load_state_dict(self.controller.agent.state_dict())
 
     def cuda(self):
-        pass
+        self.controller.cuda()
+        self.target_controller.cuda()
 
     def save_models(self, path):
         pass

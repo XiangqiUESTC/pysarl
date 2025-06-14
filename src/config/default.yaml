@@ -7,9 +7,9 @@ log_interval: 20
 # --- RL hyperparameters ---
 gamma: 0.99
 lr: 0.001
-batch_size: 4
+batch_size: 16
 buffer_size: 64
 
 
 # device control
-use_cuda: True
+device: "cuda"

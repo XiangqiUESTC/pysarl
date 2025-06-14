@@ -4,4 +4,4 @@ env_args:
   game_name: "CartPole-v1"
 
 
-t_max: 100000
+t_max: 200000

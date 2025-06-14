@@ -29,7 +29,7 @@ class EpisodeRunner(AbstractRunner):
         state = self.env.get_state()
         while not terminated:
             # 即使是一个state也要做batch化的处理，这是统一的要求
-            batch_state = torch.unsqueeze(state, 0)
+            batch_state = torch.unsqueeze(state, 0).to(self.args.device)
             actions = self.controller.select_action(batch_state, self.t_env, self.t, test_mode=test_mode)
 
             # 记录状态转移数据

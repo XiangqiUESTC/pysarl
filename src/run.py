@@ -54,6 +54,9 @@ def training(args, logger):
     # 初始化learner
     learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller,logger)
 
+    if args.device == "cuda":
+        learner.cuda()
+
     # 跑满t_max步为止
     while runner.t_env <= args.t_max:
 

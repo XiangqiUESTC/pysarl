@@ -44,3 +44,6 @@ class BasicController(AbstractController):
     def _build_inputs(self, batch):
         flat_states = torch.flatten(batch, start_dim=-self.state_dim)
         return flat_states
+
+    def cuda(self):
+        self.agent.cuda()

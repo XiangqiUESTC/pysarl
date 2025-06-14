@@ -37,3 +37,7 @@ class AbstractController(ABC):
     @abstractmethod
     def _build_inputs(self, batch):
         pass
+
+    @abstractmethod
+    def cuda(self):
+        pass

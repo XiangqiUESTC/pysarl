@@ -23,7 +23,7 @@ class EpsilonGreedy:
         # greedy action select strategy
         rand_num = torch.rand(*(agent_output.shape[0:-1]))
 
-        explore = (rand_num < self.epsilon).long()
+        explore = (rand_num < self.epsilon).long().to(agent_output.device)
 
         action_num = agent_output.shape[-1]
 
@@ -31,7 +31,7 @@ class EpsilonGreedy:
         probabilities = torch.ones(action_num)
         distribution = Categorical(probabilities)
 
-        random_action = distribution.sample(explore.shape)
+        random_action = distribution.sample(explore.shape).to(agent_output.device)
         max_q_action = agent_output.max(dim=-1)[1]
 
         picked_actions = random_action * explore + (1 - explore) * max_q_action

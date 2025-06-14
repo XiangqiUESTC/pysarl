@@ -64,7 +64,7 @@ class BasicBuffer:
                 # 创建用于填充的tensor
                 pad_tensor = torch.zeros(pad_shape, dtype=tensor_to_pad.dtype)
                 # 使用cat函数完成填充
-                padded = torch.cat([tensor_to_pad, pad_tensor], dim=0)
+                padded = torch.cat([tensor_to_pad.to(self.args.device), pad_tensor.to(self.args.device)], dim=0)
                 # 把填充后的tensor放回
                 padded_batch[key].append(padded)
             padded_batch[key] = torch.stack(padded_batch[key])

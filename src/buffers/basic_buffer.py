@@ -69,7 +69,10 @@ class BasicBuffer:
                 padded_batch[key].append(padded)
             padded_batch[key] = torch.stack(padded_batch[key])
 
-        return  padded_batch
+        return padded_batch
+
+    def clear(self):
+        self.reset()
 
     def __getitem__(self, item):
         return self.data[item]

@@ -21,5 +21,5 @@ class SimpleActor(nn.Module):
         x = F.relu(self.fc1(states))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        return F.softmax(x)
+        return F.softmax(x, dim=-1)
 

@@ -3,9 +3,11 @@ controller: "basic_controller"
 buffer: "basic_buffer"
 learner: "reinforce"
 
-batch_size: 4
-buffer_size: 4
+batch_size: 16
+buffer_size: 16
 
 agent: "simple_actor"
 hidden_size: 256
 action_selector: "policy_distribution"
+
+formula: 1

@@ -68,7 +68,5 @@ def training(args, logger):
 
         # 如果满足采样条件，就采样并学习
         if buffer.can_sample():
-            # 采样方法
-            batch = buffer.sample()
             # 学习方法
-            learner.learn(batch, runner.t_env, runner.episode)
+            learner.learn(buffer, runner.t_env, runner.episode)

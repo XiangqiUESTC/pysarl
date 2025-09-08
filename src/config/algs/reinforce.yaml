@@ -10,4 +10,4 @@ agent: "simple_actor"
 hidden_size: 256
 action_selector: "policy_distribution"
 
-formula: 1
+formula: 3

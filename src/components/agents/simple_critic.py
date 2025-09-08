@@ -9,7 +9,9 @@ class SimpleCritic(nn.Module):
         action_size = scheme.discrete_action_size
         if scheme.state_space_type == 'continuous':
             state_size = torch.prod(scheme.continuous_state_shape)
+            self.state_dim = len(scheme.continuous_state_shape)
         elif scheme.state_space_type == 'discrete':
+            self.state_dim = 1
             state_size = 1
         else:
             raise NotImplementedError('Only discrete and discrete state space are supported!')

@@ -8,7 +8,9 @@ class SimpleActor(nn.Module):
         action_size = scheme.discrete_action_size
         if scheme.state_space_type == 'continuous':
             state_size = torch.prod(scheme.continuous_state_shape)
+            self.state_dim = len(scheme.continuous_state_shape)
         elif scheme.state_space_type == 'discrete':
+            self.state_dim = 1
             state_size = 1
         else:
             raise NotImplementedError('Only discrete and discrete state space are supported!')
@@ -18,7 +20,8 @@ class SimpleActor(nn.Module):
         self.fc3 = nn.Linear(args.hidden_size, action_size)
 
     def forward(self, states):
-        x = F.relu(self.fc1(states))
+        flat_states = torch.flatten(states, start_dim=-self.state_dim)
+        x = F.relu(self.fc1(flat_states))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         return F.softmax(x, dim=-1)

@@ -13,7 +13,7 @@ class MyLogger:
 
     # 记录标量数据
     def log_scalar(self, tag, value, step):
-        if self.writer is None:
+        if self.writer is not None:
             self.writer.add_scalar(tag, value, step)
         else:
             assert False, 'Config use_tensorboard is set to False'

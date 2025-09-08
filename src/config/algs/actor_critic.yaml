@@ -1,6 +1,13 @@
-# --- General config  ---
-runner: "default"
+runner: "episode"
+controller: "basic_controller"
+buffer: "basic_buffer"
+learner: "actor_critic"
 
+agent: "simple_actor"
+critic: "simple_critic"
+action_selector: "policy_distribution"
+hidden_size: 256
 
-# use XXX to train
-agent_out_put_type: "distribution"
+gamma: 0.99
+actor_lr: 0.001
+critic_lr: 0.001

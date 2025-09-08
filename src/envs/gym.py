@@ -62,7 +62,7 @@ class Gym(SingleAgentEnv):
             state = np.array(state)
         if len(state.shape) == 0:
             state = np.expand_dims(state, axis=0)
-        state = torch.tensor(state)
+        state = torch.tensor(state).float()
         self.state = state
 
     def get_state(self):

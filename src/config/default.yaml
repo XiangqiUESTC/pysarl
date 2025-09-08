@@ -7,8 +7,8 @@ log_interval: 20
 # --- RL hyperparameters ---
 gamma: 0.99
 lr: 0.001
-batch_size: 16
-buffer_size: 64
+batch_size: 4
+buffer_size: 4
 
 
 # device control

@@ -28,12 +28,12 @@ class DQN:
         # 需要所有的states
         states = batch["states"]
         # terminated是用来判断下一状态是否为结束状态的，所以截取时不需要第一个
-        terminated = batch["terminated"][:, 1:].float().unsqueeze(-1)
+        terminated = batch["terminated"][:, 1:].float()
 
         # 最后一个动作、reward和filled都是无效的，填充的数据而已
         actions = batch["actions"][:, :-1]
-        rewards = batch["rewards"][:, :-1].unsqueeze(-1)
-        filled = batch["filled"][:, :-1].unsqueeze(-1)
+        rewards = batch["rewards"][:, :-1]
+        filled = batch["filled"][:, :-1]
 
         # 获取在线网络估计的Q值,注意取第一个step到倒数第二个step
         online_q = self.controller.forward(states[:,:-1])

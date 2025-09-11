@@ -1,3 +1,7 @@
+"""
+    xq的代码
+"""
+
 # sacred相关模块
 from sacred import Experiment
 from sacred.observers import FileStorageObserver

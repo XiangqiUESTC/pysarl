@@ -13,3 +13,5 @@ buffer_size: 4
 
 # device control
 device: "cuda"
+
+name: "rl_learn"

@@ -1,7 +1,7 @@
 env: "gym"
 
 env_args:
-  game_name: "CartPole-v1"
+  game_name: ""
 
 
 t_max: 200000

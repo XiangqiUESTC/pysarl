@@ -2,7 +2,9 @@ from copy import deepcopy
 
 import torch
 from torch import optim
-from torch.distributed.tensor.parallel import loss_parallel
+
+
+# from torch.distributed.tensor.parallel import loss_parallel
 
 
 class Reinforce:
@@ -14,34 +16,43 @@ class Reinforce:
 
         self.optimizer = optim.Adam(self.controller.parameters(), lr=args.lr)
 
-
     def learn(self, buffer, t_env, episode_num):
         batch = buffer.sample()
         # 获取基本的数据结构
         # terminated和states的长度比actions和rewards和filled多一个
 
         # 需要所有的states
-        states = batch["states"] # batch_size × (episode_length+1) × state_dim
+        states = batch["states"]  # batch_size × (episode_length+1) × state_dim
         # terminated是用来判断下一状态是否为结束状态的，所以截取时不需要第一个
-        terminated = batch["terminated"][:, 1:].float().unsqueeze(-1) # batch_size × (episode_length+1) × 1
+        terminated = (
+            batch["terminated"][:, 1:].float().unsqueeze(-1)
+        )  # batch_size × (episode_length+1) × 1
 
         # 最后一个动作、reward和filled都是无效的，填充的数据而已
-        actions = batch["actions"][:, :-1] # batch_size × episode_length × 1
-        rewards = batch["rewards"][:, :-1].unsqueeze(-1) # batch_size × episode_length × 1
-        filled = batch["filled"][:, :-1].unsqueeze(-1) # batch_size × episode_length × 1
+        actions = batch["actions"][:, :-1]  # batch_size × episode_length × 1
+        rewards = batch["rewards"][:, :-1].unsqueeze(
+            -1
+        )  # batch_size × episode_length × 1
+        filled = batch["filled"][:, :-1].unsqueeze(
+            -1
+        )  # batch_size × episode_length × 1
 
         # 获取选择动作的概率
-        action_probs = self.controller.forward(states[:,:-1])
+        action_probs = self.controller.forward(states[:, :-1])
         chosen_action_probs = torch.gather(action_probs, -1, actions)
 
         # 根据formula选择3种不同的公式
         if self.args.formula == 1:
-            episode_rewards = (rewards * filled).sum(dim=1).squeeze(-1) # batch_size
-            log_chosen_action_probs_sum = torch.log(chosen_action_probs).sum(dim=1).squeeze(-1) # batch_size
+            episode_rewards = (rewards * filled).sum(dim=1).squeeze(-1)  # batch_size
+            log_chosen_action_probs_sum = (
+                torch.log(chosen_action_probs).sum(dim=1).squeeze(-1)
+            )  # batch_size
             loss = -(episode_rewards * log_chosen_action_probs_sum).sum()
         elif self.args.formula == 2:
-            log_chosen_action_probs_cumsum = torch.log(chosen_action_probs).cumsum(dim=1)
-            loss = -(rewards*log_chosen_action_probs_cumsum).sum()
+            log_chosen_action_probs_cumsum = torch.log(chosen_action_probs).cumsum(
+                dim=1
+            )
+            loss = -(rewards * log_chosen_action_probs_cumsum).sum()
         elif self.args.formula == 3:
             log_chosen_action_probs = torch.log(chosen_action_probs)
             return_sample = (rewards * filled).flip(1).cumsum(dim=1).flip(1)
@@ -54,7 +65,6 @@ class Reinforce:
         self.optimizer.step()
         buffer.clear()
 
-
     def cuda(self):
         self.controller.cuda()
 
@@ -63,4 +73,3 @@ class Reinforce:
 
     def load_models(self, path):
         pass
-

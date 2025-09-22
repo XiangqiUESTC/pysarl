@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import torch
 from torch import optim
-from torch.distributed.tensor.parallel import loss_parallel
+from components.agents import REGISTRY
 
 
 class Reinforce:
@@ -11,6 +11,10 @@ class Reinforce:
         self.scheme = scheme
         self.controller = controller
         self.logger = logger
+
+        if args.baseline:
+            self.critic = REGISTRY[args.critic.name](args.critic, scheme)
+            self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=args.critic_lr)
 
         self.optimizer = optim.Adam(self.controller.parameters(), lr=args.lr)
 
@@ -43,7 +47,11 @@ class Reinforce:
         elif self.args.formula == 3:
             log_chosen_action_probs = torch.log(chosen_action_probs)
             return_sample = (rewards * filled).flip(1).cumsum(dim=1).flip(1)
-            loss = -(log_chosen_action_probs * return_sample * filled).sum()/filled.sum()
+            if self.args.baseline:
+                state_vals = self.critic(states[:,:-1]).detach().clone()
+                loss = -(log_chosen_action_probs * (return_sample-state_vals) * filled).sum()/filled.sum()
+            else:
+                loss = -(log_chosen_action_probs * return_sample * filled).sum()/filled.sum()
         else:
             raise NotImplementedError("Method REINFORCE only has 3 kinds of formulas!")
 
@@ -52,9 +60,21 @@ class Reinforce:
         self.optimizer.step()
         buffer.clear()
 
+        # 如果有基线还要优化基线
+        # 以return_sample作为估计
+        if self.args.baseline:
+            return_sample = (rewards * filled).flip(1).cumsum(dim=1).flip(1)
+            v_values = self.critic(states[:,:-1])
+            value_loss = ((return_sample - v_values)**2*filled).sum()/filled.sum()
+            self.critic_optimizer.zero_grad()
+            value_loss.backward()
+            self.critic_optimizer.step()
+
 
     def cuda(self):
         self.controller.cuda()
+        if self.args.baseline:
+            self.critic.cuda()
 
     def save_models(self, path):
         pass

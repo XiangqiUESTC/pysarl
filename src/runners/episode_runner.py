@@ -58,6 +58,5 @@ class EpisodeRunner(AbstractRunner):
         self.logger.log_scalar("total_rewards", total_reward, self.t_env)
 
         if self.episode % self.args.log_interval == 0:
-            self.logger.logger.info(f"第{self.episode}个episode的奖励为{total_reward}", )
-
+            self.logger.logger.info(f"Episode: {self.episode:>5} t_env: {self.t_env:>10} total_reward: {total_reward}", )
         return transaction

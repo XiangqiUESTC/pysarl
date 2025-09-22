@@ -3,13 +3,20 @@ controller: "basic_controller"
 buffer: "basic_buffer"
 learner: "reinforce"
 
-batch_size: 16
-buffer_size: 16
+batch_size: 2
+buffer_size: 2
+t_max: 240000
 
 agent: "simple_actor"
-hidden_size: 64
-action_selector: "policy_distribution"
 
 baseline: true
+critic_lr: 0.01
+critic:
+  name: "full_connect_value"
+  hidden_dim: 16
+  n_layers: 3
+
+hidden_size: 64
+action_selector: "policy_distribution"
 
 formula: 3

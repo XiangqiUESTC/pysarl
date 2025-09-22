@@ -4,12 +4,14 @@ import os
 import datetime
 
 class MyLogger:
-    def __init__(self, logger):
+    def __init__(self, args, logger):
         self.writer = None
         self.logger = logger
+        self.args = args
 
     def setup_tensorboard(self, results_file):
-        self.writer = SummaryWriter(log_dir=os.path.join(results_file, 'tb_logs', datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+        time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.writer = SummaryWriter(log_dir=os.path.join(results_file, 'tb_logs', f"{self.args.name}-{time_str}"))
 
     # 记录标量数据
     def log_scalar(self, tag, value, step):

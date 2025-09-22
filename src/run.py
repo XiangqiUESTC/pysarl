@@ -27,7 +27,7 @@ def run(ex_run, config, log):
                                        width=1)
     log.info("\n\n" + experiment_params + "\n")
 
-    logger = MyLogger(log)
+    logger = MyLogger(args, log)
 
     # 如果要使用tensorboard，在日志实例中装配
     if args.use_tensorboard:

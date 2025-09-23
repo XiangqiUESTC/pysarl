@@ -48,7 +48,7 @@ class PPO:
 
         # (为演员) 计算旧的动作对数概率
         old_log_probs = torch.log(
-            self.controller.forward(states).gather(1, actions)
+            self.controller.forward(states).gather(2, actions)
         ).detach()
         # (为演员) 计算广义优势
         advantages = compute_advantage(
@@ -57,11 +57,19 @@ class PPO:
 
         # 使用当前 batch 更新 epochs 次网络参数
         for _ in range(self.args.epochs):
-            # 当前 policy 网络计算动作的对数概率、状态价值、策略分布的熵
-            log_probs = torch.log(self.controller.forward(states).gather(1, actions))
+            # 当前 policy 网络计算动作的对数概率
+            log_probs = torch.log(self.controller.forward(states).gather(2, actions))
 
             # 计算重要性比率
             ratios = torch.exp(log_probs - old_log_probs)
+
+            # """
+            # 计算广义优势
+            # """
+            # td_delta = td_target - self.critic(states[:, :-1])
+            # advantages = compute_advantage(
+            #     self.args.gamma, self.args.lmbda, td_delta.cpu()
+            # ).to(self.args.device)
 
             # 计算策略梯度
             surr1 = ratios * advantages
@@ -77,10 +85,10 @@ class PPO:
             actor_loss = masked_action_loss.sum() / filled.sum()
             # 计算评论员的损失
             # td_target 需要 .detach()，否则会导致二次梯度传播
-            masked_value_loss = (
+            masked_critic_loss = (
                 td_target.detach() - self.critic(states[:, :-1])
             ) ** 2 * filled
-            critic_loss = masked_value_loss.sum() / filled.sum()
+            critic_loss = masked_critic_loss.sum() / filled.sum()
 
             # 清空梯度、反向传播、执行更新
             self.actor_optimizer.zero_grad()
@@ -90,8 +98,8 @@ class PPO:
             self.actor_optimizer.step()
             self.critic_optimizer.step()
 
-        # 更新旧策略网络
-        self._update_old_network()
+        # # 更新旧策略网络
+        # self._update_old_network()
 
         # 清空经验回放缓冲区
         buffer.clear()

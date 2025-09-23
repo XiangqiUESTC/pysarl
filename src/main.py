@@ -1,5 +1,5 @@
 """
-    hyr 的 pysarl程序入口
+    pysarl程序入口
 """
 # sacred相关模块
 from sacred import Experiment

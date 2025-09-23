@@ -43,10 +43,10 @@ class Gym(SingleAgentEnv):
         return self.game.spec.max_episode_steps
 
     def step(self, action):
-        state, reward, terminated, info, *_ = self.game.step(action)
+        state, reward, terminated, truncated ,info = self.game.step(action)
         self.set_state(state)
         reward = torch.tensor(reward, dtype=torch.float)
-        return self.get_state(), reward, terminated, info
+        return self.get_state(), reward, terminated, truncated ,info
 
     def reset(self):
         # 重置游戏，将self.state设置为初始状态

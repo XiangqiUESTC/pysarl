@@ -1,7 +1,7 @@
 import logging
 from torch.utils.tensorboard import SummaryWriter
 import os
-
+import datetime
 
 class MyLogger:
     def __init__(self, logger):
@@ -9,7 +9,7 @@ class MyLogger:
         self.logger = logger
 
     def setup_tensorboard(self, results_file):
-        self.writer = SummaryWriter(log_dir=os.path.join(results_file, 'tb_logs'))
+        self.writer = SummaryWriter(log_dir=os.path.join(results_file, 'tb_logs', datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
 
     # 记录标量数据
     def log_scalar(self, tag, value, step):

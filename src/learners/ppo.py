@@ -3,6 +3,7 @@ from torch import optim
 import numpy as np
 import torch
 import torch.nn.functional as F
+from components.agents.simple_critic import SimpleCritic
 
 
 class PPO:
@@ -12,12 +13,13 @@ class PPO:
         self.controller = controller
         self.logger = logger
 
-        """
-        旧策略
-        记录上次更长旧策略的时间
-        """
-        self.old_controller = deepcopy(self.controller)
-        self.last_old_update_episode = 0
+        # """
+        # 旧策略
+        # 记录上次更长旧策略的时间
+        # """
+        # self.old_controller = deepcopy(self.controller)
+        # self.last_old_update_episode = 0
+        self.critic = SimpleCritic(args, scheme)
 
         # 需要优化的参数和优化器
         self.param = list(self.controller.parameters())

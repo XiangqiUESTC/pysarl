@@ -1,6 +1,11 @@
 """
     pysarl程序入口
 """
+import logging
+from cgitb import handler
+
+from utils.logger import get_logger
+
 # sacred相关模块
 from sacred import Experiment
 from sacred.observers import FileStorageObserver
@@ -13,7 +18,6 @@ from copy import deepcopy
 import yaml
 
 # 框架其他模块
-from utils.logger import get_logger
 from utils.functions import recursive_dict_update
 from utils.functions import get_config
 from run import run
@@ -31,15 +35,19 @@ def my_main(_run, _config, _log):
             _config: 所有配置的字典
             _log: Sacred创建的日志对象
     """
+    # 格式化一下my_main函数的内置日志器
+    ch = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter('[%(levelname)s %(asctime)s] %(name)s %(message)s', '%H:%M:%S')
+    ch.setFormatter(formatter)
+    _log.addHandler(ch)
+    _log.propagate = False
     # 调用run.py中的run函数开始运行
     run(_run, _config, _log)
 
 
 if __name__ == '__main__':
-    # 日志记录设置
     logger = get_logger()
     ex.logger = logger
-
     # 根据main.py的路径（不管是相对还是绝对），获取代码根目录src绝对路径和项目根目录绝对路径
     abs_src_folder = abspath(dirname(__file__))
     abs_proj_folder = dirname(dirname(abspath(__file__)))

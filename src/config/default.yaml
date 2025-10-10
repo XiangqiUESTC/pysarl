@@ -13,5 +13,7 @@ buffer_size: 4
 
 # device control
 device: "cuda"
+# dtype control
+dtype: "float32"
 
 name: "rl_learn"

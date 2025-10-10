@@ -28,12 +28,12 @@ class EpisodeRunner(AbstractRunner):
         # 选择动作？
         state = self.env.get_state()
         while not (terminated or truncated):
+            # 记录状态转移数据（先记录state，因为要传入select_action方法中，避免在该方法内部拿不到最新的state）
+            transaction["states"].append(state)
             # 即使是一个state也要做batch化的处理，这是统一的要求
-            batch_state = torch.unsqueeze(state, 0).to(self.args.device)
-            actions = self.controller.select_action(batch_state, self.t_env, self.t, test_mode=test_mode)
+            actions = self.controller.select_action(transaction, self.t_env, self.t, test_mode=test_mode)
 
             # 记录状态转移数据
-            transaction["states"].append(state)
             transaction["actions"].append(actions)
             transaction["terminated"].append(torch.tensor([terminated]))
             # 记录步长

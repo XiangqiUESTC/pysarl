@@ -5,14 +5,25 @@ import torch
 from .single_agent_env import SingleAgentEnv
 from .specs.scheme import Scheme
 
+dtype_dict = {
+    "float32": torch.float32,
+    "float64": torch.float64,
+    "int32": torch.int32,
+    "int64": torch.int64,
+}
+
 
 class Gym(SingleAgentEnv):
-    def __init__(self, env_args):
+    def __init__(self,args):
         """
             初始化方法
         """
-        self.env_args = env_args
-        self.game_name = env_args.game_name
+        self.args = args
+        self.env_args = args.env_args
+        self.game_name = args.env_args.game_name
+        self.device = args.device
+        self.dtype = dtype_dict[args.dtype]
+
         if self.game_name.startswith("ALE/"):
             import ale_py
             gym.register_envs(ale_py)
@@ -45,7 +56,7 @@ class Gym(SingleAgentEnv):
     def step(self, action):
         state, reward, terminated, truncated ,info = self.game.step(action)
         self.set_state(state)
-        reward = torch.tensor(reward, dtype=torch.float)
+        reward = torch.tensor(reward, dtype=self.dtype, device=self.device)
         return self.get_state(), reward, terminated, truncated ,info
 
     def reset(self):
@@ -62,7 +73,7 @@ class Gym(SingleAgentEnv):
             state = np.array(state)
         if len(state.shape) == 0:
             state = np.expand_dims(state, axis=0)
-        state = torch.tensor(state).float()
+        state = torch.tensor(state, dtype=self.dtype, device=self.device)
         self.state = state
 
     def get_state(self):
@@ -72,7 +83,7 @@ class Gym(SingleAgentEnv):
     def _get_space_info(self, space):
         if isinstance(space, gym.spaces.Discrete):
             # 如果是离散类型，返回discrete字符和离散的个数
-            return "discrete", space.n, None
+            return "discrete", torch.tensor(space.n, dtype=torch.int), None
         elif isinstance(space, gym.spaces.Box):
             # 如果是连续类型，continuous字符和维度
             return "continuous", None, torch.tensor(space.shape),

@@ -41,7 +41,7 @@ class AbstractRunner(ABC):
         """
             在init初始化方法之后立即调用，用于初始化环境env和controller
         """
-        self.env = env_REGISTRY[self.args.env](self.args.env_args)
+        self.env = env_REGISTRY[self.args.env](self.args)
 
         # 获取环境scheme，用于初始化controller
         scheme = self.env.get_scheme()

@@ -23,19 +23,12 @@ class AbstractController(ABC):
     def forward(self, states):
         pass
 
-    """
-        inner method for building agent
-    """
-    @abstractmethod
-    def _build_agent(self):
-        pass
-
     @abstractmethod
     def parameters(self):
         pass
 
     @abstractmethod
-    def _build_inputs(self, batch):
+    def _build_inputs(self, batch, t):
         pass
 
     @abstractmethod

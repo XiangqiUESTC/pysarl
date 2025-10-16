@@ -1,8 +1,7 @@
 # --- Logging options ---
 use_tensorboard: True
-save_model: False # Save the models to disk
 local_results_path: "results"
-log_interval: 20
+log_interval: 5000
 
 # --- RL hyperparameters ---
 gamma: 0.99
@@ -14,8 +13,13 @@ buffer_size: 4
 cat_history_state: 1
 cat_history_action: 0
 
-#
-input_dim: null
+# Test arguments
+test_nepisode: 32
+test_interval: 5000
+
+# Model load and save
+save_model: False
+save_model_interval: 0
 
 # device control
 device: "cuda"

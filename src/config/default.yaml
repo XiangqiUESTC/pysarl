@@ -10,6 +10,12 @@ lr: 0.001
 batch_size: 4
 buffer_size: 4
 
+# Historical decision-making process
+cat_history_state: 1
+cat_history_action: 0
+
+#
+input_dim: null
 
 # device control
 device: "cuda"

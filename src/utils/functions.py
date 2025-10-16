@@ -6,6 +6,7 @@ from copy import deepcopy
 from os.path import join
 from types import SimpleNamespace as sn
 
+import torch
 import yaml
 
 
@@ -82,3 +83,12 @@ def config_copy(config):
         return [config_copy(v) for v in config]
     else:
         return deepcopy(config)
+
+def warp_episode(episode_transaction):
+    warped = {}
+    for key, value in episode_transaction.items():
+        if len(value) > 0:
+            warped[key] = torch.stack(value).unsqueeze(0)
+        else:
+            warped[key] = None
+    return warped

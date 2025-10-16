@@ -9,6 +9,8 @@ class EpisodeRunner(AbstractRunner):
 
     def __init__(self, args, logger):
         super().__init__(args, logger)
+        # 每次运行只得到一个episode
+        self.batch_size = 1
 
     # 这个函数会跑完一个完整的episode，收集整个episode的交互数据
     def run(self, test_mode=False):

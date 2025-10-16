@@ -22,11 +22,11 @@ class BasicBuffer:
         self.max_episode_length = 0
         self.episode_num = 0
 
-    def insert(self, transaction):
-        if not isinstance(transaction, dict):
+    def insert_episode(self, episode_transaction):
+        if not isinstance(episode_transaction, dict):
             raise TypeError("状态转移字典应为字典类型数据变量")
         else:
-            for key, value in transaction.items():
+            for key, value in episode_transaction.items():
                 if key not in self.data:
                     self.data[key] = deque(maxlen=self.args.buffer_size)
                 self.data[key].append(value)

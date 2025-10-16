@@ -57,8 +57,9 @@ def training(args, logger):
     if args.device == "cuda":
         learner.cuda()
 
-    # 训练结束标志
+    # 初始化其他变量，如训练结束标志，测试计数
     finish_train = False
+    last_test_t = 0
 
     # 跑满t_max步为止
     while runner.t_env <= args.t_max:
@@ -73,3 +74,22 @@ def training(args, logger):
         if buffer.can_sample():
             # 学习方法
             finish_train = learner.learn(buffer, runner.t_env, runner.episode)
+
+        # 进行测试
+        if (runner.controller.t_env -  last_test_t) / args.test_interval >=1.0:
+            # 计算测试次数
+            n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+            # 开始测试
+            for _ in range(n_test_runs):
+                runner.run(test_mode=True)
+
+        # 进行模型的保存
+        if (runner.controller.t_env - last_test_t) / args.save_model_interval >= 1.0:
+            pass
+
+        # 进行训练数据和测试数据的打印
+        if (runner.controller.t_env - last_test_t) / args.log_interval >= 1.0:
+            pass
+
+    logger.info("训练结束！")
+

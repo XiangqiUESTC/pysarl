@@ -23,9 +23,6 @@ class BasicController(AbstractController):
         else:
             raise NotImplementedError("State space type not supported!")
 
-        ## 构建agent
-        self.agent = agent_REGISTRY[self.args.agent](self.args, self.scheme)
-
         ## 初始化动作选择器
         self.action_selector = action_selector_REGISTRY[args.action_selector](args)
 
@@ -35,9 +32,17 @@ class BasicController(AbstractController):
             self.state_encoder = state_encoder_REGISTRY[encoder_reg_name](self.args, self.scheme)
         else:
             self.state_encoder = None
+        # 获取encoder的输出维度
+
+
+        # 保存agent的输入维度
+        self.input_dim = self.args.input_dim = self.get_agent_input_dim()
+
+        ## 构建agent
+        self.agent = agent_REGISTRY[self.args.agent](self.args, self.scheme)
 
     def select_action(self, transaction_batch, t_env, t, test_mode=False):
-        agent_inputs = self._build_inputs(transaction_batch, t)
+        agent_inputs = self.build_inputs(transaction_batch, t)
         agents_outputs = self.forward(agent_inputs)
         return self.action_selector.select_action(agents_outputs, t_env, t, test_mode=test_mode)
 
@@ -47,11 +52,25 @@ class BasicController(AbstractController):
     def parameters(self):
         return self.agent.parameters()
 
-    def _build_inputs(self, transaction_batch, t):
+    def build_inputs(self, transaction_batch, t):
+        # 获取所有的state
         states = transaction_batch["states"]
-        some_state = states[t:t + 1]
 
-        return torch.stack(some_state)
+        # 获取要多少历史state
+        history_state_num = self.args.cat_history_state
+
+        # 分两种情况，一种是可以直接拼接，一种是历史state不足，那么就要拼接空矩阵
+        if t - history_state_num >= 0:
+            some_state = states[:,t:t + 1]
+        else:
+            some_state = states[:,0:t + 1]
+
+        return some_state
 
     def cuda(self):
         self.agent.cuda()
+
+    def get_agent_input_dim(self):
+        # Total state
+        state_num = self.args.cat_history_state + 1
+        return self.state_dim

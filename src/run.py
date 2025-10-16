@@ -57,16 +57,19 @@ def training(args, logger):
     if args.device == "cuda":
         learner.cuda()
 
+    # 训练结束标志
+    finish_train = False
+
     # 跑满t_max步为止
     while runner.t_env <= args.t_max:
 
         # runner控制env和agent交互，不同的runner有不同的控制粒度
-        transaction = runner.run()
+        episode_transaction = runner.run()
 
         # buffer收集数据
-        buffer.insert(transaction)
+        buffer.insert_episode(episode_transaction)
 
         # 如果满足采样条件，就采样并学习
         if buffer.can_sample():
             # 学习方法
-            learner.learn(buffer, runner.t_env, runner.episode)
+            finish_train = learner.learn(buffer, runner.t_env, runner.episode)

@@ -52,7 +52,7 @@ def training(args, logger):
     buffer = buffer_REGISTRY[args.buffer](args, runner.scheme)
 
     # 初始化learner
-    learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller,logger)
+    learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller, buffer, logger)
 
     if args.device == "cuda":
         learner.cuda()
@@ -76,7 +76,7 @@ def training(args, logger):
             finish_train = learner.learn(buffer, runner.t_env, runner.episode)
 
         # 进行测试
-        if (runner.controller.t_env -  last_test_t) / args.test_interval >=1.0:
+        if (runner.t_env -  last_test_t) / args.test_interval >=1.0:
             # 计算测试次数
             n_test_runs = max(1, args.test_nepisode // runner.batch_size)
             # 开始测试
@@ -84,12 +84,12 @@ def training(args, logger):
                 runner.run(test_mode=True)
 
         # 进行模型的保存
-        if (runner.controller.t_env - last_test_t) / args.save_model_interval >= 1.0:
+        if args.save_model_interval!= 0 and (runner.t_env - last_test_t) / args.save_model_interval >= 1.0:
             pass
 
         # 进行训练数据和测试数据的打印
-        if (runner.controller.t_env - last_test_t) / args.log_interval >= 1.0:
+        if (runner.t_env - last_test_t) / args.log_interval >= 1.0:
             pass
 
-    logger.info("训练结束！")
+    logger.logger.info("训练结束！")
 

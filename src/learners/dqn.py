@@ -1,13 +1,16 @@
 from copy import deepcopy
+
+import torch
 from torch import optim
 
 
 class DQN:
-    def __init__(self, args, scheme, controller, logger):
+    def __init__(self, args, scheme, controller, buffer, logger):
         self.args = args
         self.scheme = scheme
         self.controller = controller
         self.logger = logger
+        self.buffer = buffer
 
         # 准备好目标网络
         self.target_controller = deepcopy(self.controller)
@@ -36,15 +39,24 @@ class DQN:
         filled = batch["filled"][:, :-1]
 
         # 获取在线网络估计的Q值,注意取第一个step到倒数第二个step
-        online_q = self.controller.forward(states[:,:-1])
-
-        # 获取目标网络的估计Q值，注意取第二个step取到倒数最后一个step
-        target_q = self.target_controller.forward(states[:,1:]).detach()
-
+        qs = self.controller.forward(states)
+        online_q = qs[:,:-1]
         # 获取所选动作的q值
         chosen_action_q_val = online_q.gather(2, actions)
-        # 获取下一状态的最大q值动作的q值
-        max_next_q_value = target_q.max(2)[0].unsqueeze(-1)
+
+        if self.args.double_q:
+            # 使用在线网络选择下一状态的最佳动作
+            next_online_q = qs[:,1:]
+            next_actions = next_online_q.max(2)[1].unsqueeze(-1)
+
+            next_target_q = self.target_controller.forward(states[:, 1:]).detach()
+            max_next_q_value = next_target_q.gather(2, next_actions)
+        else:
+            # 获取目标网络的估计Q值，注意取第二个step取到倒数最后一个step
+            target_q = self.target_controller.forward(states[:, 1:]).detach()
+            # 获取下一状态的最大q值动作的q值
+            max_next_q_value = target_q.max(2)[0].unsqueeze(-1)
+
 
         # TD error, 几乎是所有q学习的关键更新指标
         td_error = chosen_action_q_val - (rewards + max_next_q_value * (1-terminated))
@@ -58,6 +70,8 @@ class DQN:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        self.logger.log_stats("loss", loss.item(), t_env)
 
         # 根据episode更新目标网络
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:

@@ -6,11 +6,12 @@ from components.agents import REGISTRY
 
 
 class Reinforce:
-    def __init__(self, args, scheme, controller, logger):
+    def __init__(self, args, scheme, controller, buffer, logger):
         self.args = args
         self.scheme = scheme
         self.controller = controller
         self.logger = logger
+        self.buffer = buffer
 
         if args.baseline:
             self.critic = REGISTRY[args.critic.name](args.critic, scheme)

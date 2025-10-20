@@ -5,12 +5,13 @@ from torch import optim
 from components.agents import REGISTRY
 
 class ActorCritic:
-    def __init__(self, args, scheme, controller, logger):
+    def __init__(self, args, scheme, controller, buffer, logger):
         # 保存参数
         self.args = args
         self.scheme = scheme
         self.controller = controller
         self.logger = logger
+        self.buffer = buffer
 
         # 定义critic
         self.critic = REGISTRY[args.critic](args, scheme)

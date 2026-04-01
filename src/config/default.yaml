@@ -27,3 +27,5 @@ device: "cuda"
 dtype: "float32"
 
 name: "rl_learn"
+
+default_wrappers: ["all_to_tensor",]

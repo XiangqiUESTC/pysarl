@@ -1,8 +1,9 @@
 import gymnasium as gym
 import numpy as np
 import torch
+from gymnasium.wrappers import TimeLimit
 
-from .single_agent_env import SingleAgentEnv
+from wrapper import REGISTRY
 from .specs.scheme import Scheme
 
 dtype_dict = {
@@ -13,7 +14,7 @@ dtype_dict = {
 }
 
 
-class Gym(SingleAgentEnv):
+class Gym(gym.Env):
     def __init__(self,args):
         """
             初始化方法
@@ -24,12 +25,30 @@ class Gym(SingleAgentEnv):
         self.device = args.device
         self.dtype = dtype_dict[args.dtype]
 
+        # 注册游戏并添加wrapper
         if self.game_name.startswith("ALE/"):
             import ale_py
             gym.register_envs(ale_py)
-            self.game = gym.make(self.game_name)
+            game = gym.make(self.game_name)
         else:
-            self.game = gym.make(self.game_name)
+            game = gym.make(self.game_name)
+
+        # Todo 是否有环境自带截断？有的话得想办法去掉，不然可能会取小？
+        # 添加时间截断
+        max_episode_steps = args.env_args.max_episode_steps
+        game = TimeLimit(game, max_episode_steps=max_episode_steps)
+
+        # 添加wrapper
+        for wrapper_name in args.default_wrappers:
+            wrapper = REGISTRY[wrapper_name]
+            game = wrapper(game)
+
+        # 添加wrapper
+        for wrapper_name in args.env_wrappers:
+            wrapper = REGISTRY[wrapper_name]
+            game = wrapper(game)
+
+        self.game = game
         # state设置为None
         self.state = None
         # 状态是否结束设置为None

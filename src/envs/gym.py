@@ -13,7 +13,7 @@ dtype_dict = {
     "int64": torch.int64,
 }
 
-
+# Todo 经过包装器之后，Gym里面有些方法就不合适了，比如set_state，需要分析并重构
 class Gym(gym.Env):
     def __init__(self,args):
         """

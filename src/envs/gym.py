@@ -4,7 +4,6 @@ import torch
 from gymnasium.wrappers import TimeLimit
 
 from wrapper import REGISTRY
-from .specs.scheme import Scheme
 
 dtype_dict = {
     "float32": torch.float32,
@@ -62,12 +61,31 @@ class Gym(gym.Env):
         """
             获取模式,返回一个Scheme类
         """
-        observation_space = self.game.observation_space
-        action_space = self.game.action_space
-        # 先处理状态空间
-        observation_space_info = self._get_space_info(observation_space)
-        action_space_info = self._get_space_info(action_space)
-        return Scheme(*action_space_info, *observation_space_info)
+        ob_shape, ob_type = self._get_space_shape_and_type(self.game.observation_space)
+
+        scheme = {
+            "state":{
+                "shape":ob_shape,
+                "type":ob_type,
+            },
+            "reward":{
+                "shape": (1,),
+                "type": torch.float32,
+            },
+            "terminated":{
+                "shape": (1,),
+                "type": torch.float32,
+            },
+            "truncated":{
+                "shape": (1,),
+                "type": torch.float32,
+            },
+            "filled": {
+                "shape": (1,),
+                "type": torch.float32,
+            }
+        }
+        return scheme
 
     def get_max_episode_steps(self):
         return self.args.env_args.max_episode_steps
@@ -89,13 +107,13 @@ class Gym(gym.Env):
         return self._state
 
     # 私有方法，用来获得一个space的信息，space是gym定义的几种基本的space的类型
-    def _get_space_info(self, space):
+    def _get_space_shape_and_type(self, space):
         if isinstance(space, gym.spaces.Discrete):
             # 如果是离散类型，返回discrete字符和离散的个数
-            return "discrete", torch.tensor(space.n, dtype=torch.int), None
+            return (1,), torch.int32
         elif isinstance(space, gym.spaces.Box):
             # 如果是连续类型，continuous字符和维度
-            return "continuous", None, torch.tensor(space.shape),
+            return space.shape, torch.float32
         else:
             # 还没有处理其他类型space的代码，遇到其它类型的代码就抛异常
             raise NotImplementedError(

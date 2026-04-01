@@ -50,7 +50,7 @@ class Gym(gym.Env):
 
         self.game = game
         # state设置为None
-        self.state = None
+        self._state = None
         # 状态是否结束设置为None
         self.terminated = None
         # 获取scheme
@@ -70,33 +70,23 @@ class Gym(gym.Env):
         return Scheme(*action_space_info, *observation_space_info)
 
     def get_max_episode_steps(self):
-        return self.game.spec.max_episode_steps
+        return self.args.env_args.max_episode_steps
 
     def step(self, action):
         state, reward, terminated, truncated ,info = self.game.step(action)
-        self.set_state(state)
-        reward = torch.tensor(reward, dtype=self.dtype, device=self.device)
-        return self.get_state(), reward, terminated, truncated ,info
+        return state, reward, terminated, truncated ,info
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         # 重置游戏，将self.state设置为初始状态
-        state, *_ = self.game.reset()
-        # 设置state
-        self.set_state(state)
-        # 将游戏结束设置为False
-        self.terminated = False
+        state, info = self.game.reset(seed=seed, options=options)
+        return state, info
 
-    # 统一一下表达，如果state没有维度，那么给它加一个维度
+    # 保存state
     def set_state(self, state):
-        if not isinstance(state, np.ndarray):
-            state = np.array(state)
-        if len(state.shape) == 0:
-            state = np.expand_dims(state, axis=0)
-        state = torch.tensor(state, dtype=self.dtype, device=self.device)
-        self.state = state
-
+        self._state = state
+    # 获取state
     def get_state(self):
-        return self.state
+        return self._state
 
     # 私有方法，用来获得一个space的信息，space是gym定义的几种基本的space的类型
     def _get_space_info(self, space):

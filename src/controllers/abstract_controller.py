@@ -4,9 +4,9 @@ from abc import abstractmethod
 
 # 用来控制单智能体行为的抽象类
 class AbstractController(ABC):
-    def __init__(self, scheme, args):
-        self.scheme = scheme
+    def __init__(self, args, scheme):
         self.args = args
+        self.scheme = scheme
         self.agent = None
 
     """

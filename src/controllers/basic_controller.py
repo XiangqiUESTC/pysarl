@@ -3,7 +3,6 @@ import torch
 from .abstract_controller import AbstractController
 from components.agents import REGISTRY as agent_REGISTRY
 from components.action_selectors import REGISTRY as action_selector_REGISTRY
-from components.state_encoder import REGISTRY as state_encoder_REGISTRY
 
 
 # the controllers for vanilla value-based and policy-base rl algorithm
@@ -26,12 +25,6 @@ class BasicController(AbstractController):
         ## 初始化动作选择器
         self.action_selector = action_selector_REGISTRY[args.action_selector](args)
 
-        ## 构建state_encoder
-        encoder_reg_name = getattr(args, "encoder", args.env_args.game_name)
-        if encoder_reg_name in state_encoder_REGISTRY:
-            self.state_encoder = state_encoder_REGISTRY[encoder_reg_name](self.args, self.scheme)
-        else:
-            self.state_encoder = None
         # 获取encoder的输出维度
 
 

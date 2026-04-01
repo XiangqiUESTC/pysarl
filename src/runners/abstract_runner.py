@@ -44,14 +44,10 @@ class AbstractRunner(ABC):
         self.env = env_REGISTRY[self.args.env](self.args)
 
         # 获取环境scheme，用于初始化controller
-        scheme = self.env.get_scheme()
-
-        self.scheme = scheme
-
-        # TODO 在这里要检查算法和环境是否相匹配
+        self.scheme = self.env.get_scheme()
 
         # 使用scheme初始化controller
-        self.controller = controller_REGISTRY[self.args.controller](self.args, scheme)
+        self.controller = controller_REGISTRY[self.args.controller](self.args, self.scheme)
 
     # 重置一个episode中的环境
     def reset(self):

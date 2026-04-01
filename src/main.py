@@ -66,8 +66,23 @@ if __name__ == '__main__':
     # 读取算法配置
     alg_config = get_config(params, "--alg-config", join(abs_src_folder, "config/algs"))
 
+    # 提前确定游戏
+    game = env_config["env_args"]["game_name"]
+    # 检查命令行里面有没有
+    for param in params:
+        splits = param.split("=")
+        if splits[0] == "env_args.game_name":
+            game = splits[1]
+    # 读取游戏配置
+    try:
+        game_config = yaml.safe_load(open(f"{abs_src_folder}/config/games/{game}.yaml"))
+    except yaml.YAMLError as exc:
+        assert False, f"Reading {abs_src_folder}/config/{game}.yaml error {exc}"
+
     # 用环境配置递归地更新默认配置
     config_dict = recursive_dict_update(config_dict, env_config)
+    # 用游戏配置递归地更新默认配置
+    config_dict = recursive_dict_update(config_dict, game_config)
     # 再用算法配置递归地更新默认配置
     config_dict = recursive_dict_update(config_dict, alg_config)
 

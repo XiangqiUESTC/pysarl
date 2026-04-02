@@ -2,7 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from envs import REGISTRY as env_REGISTRY
 from controllers import REGISTRY as controller_REGISTRY
-
+from buffers import REGISTRY as buffer_REGISTRY
 
 class AbstractRunner(ABC):
     """
@@ -19,7 +19,8 @@ class AbstractRunner(ABC):
         """
         self.env = None
         self.controller = None
-        self.scheme = None
+        self.buffer = None
+        self.env_scheme = None
 
         self.args = args
         self.logger = logger
@@ -44,10 +45,13 @@ class AbstractRunner(ABC):
         self.env = env_REGISTRY[self.args.env](self.args)
 
         # 获取环境scheme，用于初始化controller
-        self.scheme = self.env.get_scheme()
+        self.env_scheme = self.env.get_scheme()
 
         # 使用scheme初始化controller
-        self.controller = controller_REGISTRY[self.args.controller](self.args, self.scheme)
+        self.controller = controller_REGISTRY[self.args.controller](self.args, self.env_scheme)
+
+        # 初始化buffer
+        self.buffer = buffer_REGISTRY[self.args.buffer](self.args, self.env_scheme)
 
     # 重置一个episode中的环境
     def reset(self):

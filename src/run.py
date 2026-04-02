@@ -7,7 +7,7 @@ from utils.logger import MyLogger
 from utils.functions import dict_to_namespace
 
 from runners import REGISTRY as runner_REGISTRY
-from buffers import REGISTRY as buffer_REGISTRY
+
 from learners import REGISTER as learner_REGISTRY
 
 
@@ -45,14 +45,11 @@ def training(args, logger):
             args: args是一个SimpleNamespace对象，由sacred配置项转化而来，它控制整个强化学习流程的各个方面
             logger: logger是日志器对象
     """
-    # 初始化runner
+    # 初始化runner,runner会初始化env和agent还有buffer
     runner = runner_REGISTRY[args.runner](args, logger)
 
-    # 初始化buffer
-    buffer = buffer_REGISTRY[args.buffer](args, runner.scheme)
-
     # 初始化learner
-    learner = learner_REGISTRY[args.learner](args, runner.scheme, runner.controller, buffer, logger)
+    learner = learner_REGISTRY[args.learner](args, runner, logger)
 
     if args.device == "cuda":
         learner.cuda()
@@ -65,15 +62,13 @@ def training(args, logger):
     while runner.t_env <= args.t_max:
 
         # runner控制env和agent交互，不同的runner有不同的控制粒度
-        episode_transaction = runner.run()
+        runner.run()
 
-        # buffer收集数据
-        buffer.insert_episode(episode_transaction)
-
+        # Todo是否学习应该由学习器返回，而非buffer
         # 如果满足采样条件，就采样并学习
-        if buffer.can_sample():
-            # 学习方法
-            finish_train = learner.learn(buffer, runner.t_env, runner.episode)
+        # if buffer.can_sample():
+        #     # 学习方法
+        #     finish_train = learner.learn(buffer, runner.t_env, runner.episode)
 
         # 进行测试
         if (runner.t_env -  last_test_t) / args.test_interval >=1.0:

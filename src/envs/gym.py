@@ -12,7 +12,7 @@ dtype_dict = {
     "int64": torch.int64,
 }
 
-# Todo 经过包装器之后，Gym里面有些方法就不合适了，比如set_state，需要分析并重构
+
 class Gym(gym.Env):
     def __init__(self,args):
         """
@@ -32,8 +32,6 @@ class Gym(gym.Env):
         else:
             game = gym.make(self.game_name)
 
-        # Todo 是否有环境自带截断？有的话得想办法去掉，不然可能会取小？
-        # 添加时间截断
         max_episode_steps = args.env_args.max_episode_steps
         game = TimeLimit(game, max_episode_steps=max_episode_steps)
 
@@ -62,11 +60,18 @@ class Gym(gym.Env):
             获取模式,返回一个Scheme类
         """
         ob_shape, ob_type = self._get_space_shape_and_type(self.game.observation_space)
+        action_shape, action_type = self._get_space_shape_and_type(self.game.action_space)
 
         scheme = {
             "state":{
                 "shape":ob_shape,
                 "type":ob_type,
+                "space": self.game.observation_space,
+            },
+            "action": {
+                "shape": action_shape,
+                "type": action_type,
+                "space": self.game.action_space,
             },
             "reward":{
                 "shape": (1,),
@@ -92,11 +97,15 @@ class Gym(gym.Env):
 
     def step(self, action):
         state, reward, terminated, truncated ,info = self.game.step(action)
+        self.set_state(state)
+        self.terminated = terminated
         return state, reward, terminated, truncated ,info
 
     def reset(self, seed=None, options=None):
         # 重置游戏，将self.state设置为初始状态
         state, info = self.game.reset(seed=seed, options=options)
+        self.set_state(state)
+        self.terminated = False
         return state, info
 
     # 保存state
@@ -110,9 +119,11 @@ class Gym(gym.Env):
     def _get_space_shape_and_type(self, space):
         if isinstance(space, gym.spaces.Discrete):
             # 如果是离散类型，返回discrete字符和离散的个数
-            return (1,), torch.int32
+            return (1,), torch.int64
         elif isinstance(space, gym.spaces.Box):
             # 如果是连续类型，continuous字符和维度
+            if np.issubdtype(space.dtype, np.integer):
+                return space.shape, torch.int64
             return space.shape, torch.float32
         else:
             # 还没有处理其他类型space的代码，遇到其它类型的代码就抛异常

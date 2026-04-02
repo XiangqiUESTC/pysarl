@@ -6,18 +6,16 @@ from components.agents import REGISTRY
 
 
 class Reinforce:
-    def __init__(self, args, scheme, controller, buffer, logger):
+    def __init__(self, args, runner, logger):
         self.args = args
-        self.scheme = scheme
-        self.controller = controller
-        self.logger = logger
-        self.buffer = buffer
+        self.runner = runner
+        controller = runner.controller
 
         if args.baseline:
-            self.critic = REGISTRY[args.critic.name](args.critic, scheme)
+            self.critic = REGISTRY[args.critic.name](args.critic, None)
             self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=args.critic_lr)
 
-        self.optimizer = optim.Adam(self.controller.parameters(), lr=args.lr)
+        self.optimizer = optim.Adam(controller.parameters(), lr=args.lr)
 
 
     def learn(self, buffer, t_env, episode_num):
@@ -34,7 +32,7 @@ class Reinforce:
         filled = batch["filled"][:, :-1] # batch_size × episode_length × 1
 
         # 获取选择动作的概率
-        action_probs = self.controller.forward(states[:,:-1])
+        action_probs = self.runner.controller.forward(states[:,:-1])
         chosen_action_probs = torch.gather(action_probs, -1, actions)
 
         # 根据formula选择3种不同的公式
@@ -73,7 +71,7 @@ class Reinforce:
 
 
     def cuda(self):
-        self.controller.cuda()
+        self.runner.controller.cuda()
         if self.args.baseline:
             self.critic.cuda()
 

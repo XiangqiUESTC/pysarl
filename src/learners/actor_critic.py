@@ -5,19 +5,18 @@ from torch import optim
 from components.agents import REGISTRY
 
 class ActorCritic:
-    def __init__(self, args, scheme, controller, buffer, logger):
+    def __init__(self, args, runner, logger):
         # 保存参数
         self.args = args
-        self.scheme = scheme
-        self.controller = controller
-        self.logger = logger
-        self.buffer = buffer
+        self.runner = runner
+
+
 
         # 定义critic
-        self.critic = REGISTRY[args.critic](args, scheme)
+        self.critic = REGISTRY[args.critic](args, None)
 
         # 定义优化器
-        self.actor_optimizer = optim.Adam(self.controller.agent.parameters(), lr=args.actor_lr)
+        self.actor_optimizer = optim.Adam(self.runner.controller.agent.parameters(), lr=args.actor_lr)
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=args.critic_lr)
 
 
@@ -25,7 +24,7 @@ class ActorCritic:
         pass
 
     def cuda(self):
-        self.controller.cuda()
+        self.runner.controller.cuda()
         self.critic.cuda()
 
     def save_models(self, path):

@@ -5,20 +5,18 @@ from torch import optim
 
 
 class DQN:
-    def __init__(self, args, scheme, controller, buffer, logger):
+    def __init__(self, args, runner, logger):
         self.args = args
-        self.scheme = scheme
-        self.controller = controller
+        self.runner = runner
         self.logger = logger
-        self.buffer = buffer
 
         # 准备好目标网络
-        self.target_controller = deepcopy(self.controller)
+        self.target_controller = deepcopy(self.runner.controller)
         # 记录上次更新目标网络的时间
         self.last_target_update_episode = 0
 
         # 需要优化的参数和优化器
-        self.param = list(self.controller.parameters())
+        self.param = list(self.runner.controller.parameters())
         self.optimizer = optim.Adam(self.param, lr=self.args.lr)
 
 
@@ -39,7 +37,7 @@ class DQN:
         filled = batch["filled"][:, :-1]
 
         # 获取在线网络估计的Q值,注意取第一个step到倒数第二个step
-        qs = self.controller.forward(states)
+        qs = self.runner.controller.forward(states)
         online_q = qs[:,:-1]
         # 获取所选动作的q值
         chosen_action_q_val = online_q.gather(2, actions)
@@ -79,10 +77,10 @@ class DQN:
             self.last_target_update_episode = episode_num
 
     def _update_target_network(self):
-        self.target_controller.agent.load_state_dict(self.controller.agent.state_dict())
+        self.target_controller.agent.load_state_dict(self.runner.controller.agent.state_dict())
 
     def cuda(self):
-        self.controller.cuda()
+        self.runner.controller.cuda()
         self.target_controller.cuda()
 
     def save_models(self, path):

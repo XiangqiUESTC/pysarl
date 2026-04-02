@@ -1,6 +1,8 @@
+from typing import Any
+
 import torch
 from gymnasium import ObservationWrapper, RewardWrapper, Wrapper
-
+from gymnasium.core import WrapperObsType
 
 
 class StateToTensor(ObservationWrapper):
@@ -39,6 +41,11 @@ class FlagToTensor(Wrapper):
 class AllToTensor(Wrapper):
     def __init__(self, env):
         super(AllToTensor, self).__init__(env)
+
+    def reset(self, seed=None, options=None):
+        state, info = self.env.reset(seed=seed, options=options)
+        state = torch.tensor(state)
+        return state, info
 
     def step(self, action):
         state, reward, terminated, truncated, info = self.env.step(action)

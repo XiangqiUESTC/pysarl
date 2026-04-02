@@ -10,8 +10,9 @@ batch_size: 4
 buffer_size: 4
 
 # Historical decision-making process
-cat_history_state: 1
-cat_history_action: 0
+builder: "basic_builder"
+history_frame_num: 0
+history_action_num: 0
 
 # Test arguments
 test_nepisode: 32

@@ -18,16 +18,9 @@ class DQN:
         self.param = list(self.runner.controller.parameters())
         self.optimizer = optim.Adam(self.param, lr=self.args.lr)
 
-
-
     def learn(self, buffer, t_env, episode_num):
-        batch = buffer.sample()
-        # 获取基本的数据结构
-        # terminated和states的长度比actions和rewards和filled多一个
+        batch = buffer.sample(granularity="step")
 
-        # 需要所有的states
-        states = batch["states"]
-        # terminated是用来判断下一状态是否为结束状态的，所以截取时不需要第一个
         terminated = batch["terminated"][:, 1:].float()
         actions = batch["action"][:, :-1].long()
         rewards = batch["reward"][:, :-1]
@@ -37,13 +30,18 @@ class DQN:
         online_q = qs[:, :-1]
         chosen_action_q_val = online_q.gather(2, actions)
 
+        next_batch = {
+            key: value[:, 1:]
+            for key, value in batch.items()
+        }
+
         if self.args.double_q:
             next_online_q = qs[:, 1:]
             next_actions = next_online_q.max(2)[1].unsqueeze(-1)
-            next_target_q = self.target_controller.forward(batch, start_t=1).detach()
+            next_target_q = self.target_controller.forward(next_batch).detach()
             max_next_q_value = next_target_q.gather(2, next_actions)
         else:
-            target_q = self.target_controller.forward(batch, start_t=1).detach()
+            target_q = self.target_controller.forward(next_batch).detach()
             max_next_q_value = target_q.max(2)[0].unsqueeze(-1)
 
         td_target = rewards + max_next_q_value * (1 - terminated)
@@ -58,7 +56,6 @@ class DQN:
 
         self.logger.log_stats("loss", loss.item(), t_env)
 
-        # 根据episode更新目标网络
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_target_network()
             self.last_target_update_episode = episode_num

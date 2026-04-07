@@ -40,7 +40,10 @@ class Reinforce:
             return_sample = (reward * valid).flip(1).cumsum(dim=1).flip(1)
 
             if self.args.baseline:
-                critic_batch = self.runner.controller.slice_batch(batch, end_t=-1)
+                critic_batch = {
+                    key: value[:, :-1]
+                    for key, value in batch.items()
+                }
                 state_values = self.critic(critic_batch).detach().clone()
                 loss = -(log_chosen_action_probs * (return_sample - state_values) * valid).sum() / valid.sum().clamp_min(1.0)
             else:
@@ -53,11 +56,12 @@ class Reinforce:
         self.optimizer.step()
         buffer.clear()
 
-        # 如果有基线还要优化基线
-        # 以return_sample作为估计
         if self.args.baseline:
             return_sample = (reward * valid).flip(1).cumsum(dim=1).flip(1)
-            critic_batch = self.runner.controller.slice_batch(batch, end_t=-1)
+            critic_batch = {
+                key: value[:, :-1]
+                for key, value in batch.items()
+            }
             value_prediction = self.critic(critic_batch)
             value_loss = ((return_sample - value_prediction) ** 2 * valid).sum() / valid.sum().clamp_min(1.0)
 

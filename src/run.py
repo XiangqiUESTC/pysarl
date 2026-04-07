@@ -3,12 +3,10 @@ from os.path import abspath
 from os.path import dirname
 import pprint
 
-from utils.logger import MyLogger
-from utils.functions import dict_to_namespace
-
-from runners import REGISTRY as runner_REGISTRY
-
 from learners import REGISTER as learner_REGISTRY
+from runners import REGISTRY as runner_REGISTRY
+from utils.functions import dict_to_namespace
+from utils.logger import MyLogger
 
 
 def run(ex_run, config, log):
@@ -77,6 +75,7 @@ def training(args, logger):
             # 开始测试
             for _ in range(n_test_runs):
                 runner.run(test_mode=True)
+            last_test_t = runner.t_env
 
         # 进行模型的保存
         if args.save_model_interval!= 0 and (runner.t_env - last_test_t) / args.save_model_interval >= 1.0:

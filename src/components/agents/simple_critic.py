@@ -27,8 +27,8 @@ class SimpleCritic(nn.Module):
         self.fc2 = nn.Linear(args.hidden_size, args.hidden_size)
         self.fc3 = nn.Linear(args.hidden_size, action_size)
 
-    def forward(self, batch):
-        states = batch["input"]
+    def forward(self, batch, t=None):
+        states = batch["input"] if t is None else batch["input"][:, t:t + 1]
         flat_states = torch.flatten(states.float(), start_dim=-self.input_dim)
 
         x = F.relu(self.fc1(flat_states))

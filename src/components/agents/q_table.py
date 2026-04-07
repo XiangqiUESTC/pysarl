@@ -27,8 +27,8 @@ class QTable:
             dtype=torch.float64,
         )
 
-    def __call__(self, batch):
-        state_indexes = batch["input"]
+    def __call__(self, batch, t=None):
+        state_indexes = batch["input"] if t is None else batch["input"][:, t:t + 1]
 
         if state_indexes.shape[-1] == 1:
             state_indexes = state_indexes.squeeze(-1)

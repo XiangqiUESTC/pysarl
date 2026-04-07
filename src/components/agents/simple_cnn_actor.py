@@ -74,8 +74,8 @@ class SimpleCNNActor(nn.Module):
         self.fc2 = nn.Linear(args.hidden_size, args.hidden_size)
         self.fc3 = nn.Linear(args.hidden_size, action_size)
 
-    def forward(self, batch):
-        states = batch["input"]
+    def forward(self, batch, t=None):
+        states = batch["input"] if t is None else batch["input"][:, t:t + 1]
 
         if self.use_cnn:
             original_shape = states.shape

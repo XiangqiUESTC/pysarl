@@ -35,8 +35,8 @@ class FullConnectedValue(nn.Module):
             else:
                 self.linear_layers.append(nn.Linear(hidden_dim, hidden_dim))
 
-    def forward(self, batch):
-        x = batch["input"]
+    def forward(self, batch, t=None):
+        x = batch["input"] if t is None else batch["input"][:, t:t + 1]
         x = torch.flatten(x.float(), start_dim=-self.input_dim)
 
         for layer_index, layer in enumerate(self.linear_layers):

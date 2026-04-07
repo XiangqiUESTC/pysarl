@@ -1,29 +1,46 @@
+import gymnasium as gym
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 
 
-# simple_full_connect_actor
 class SimpleCritic(nn.Module):
-    def __init__(self, args, scheme):
-        action_size = scheme.discrete_action_size
-        if scheme.state_space_type == 'continuous':
-            state_size = torch.prod(scheme.continuous_state_shape)
-            self.state_dim = len(scheme.continuous_state_shape)
-        elif scheme.state_space_type == 'discrete':
-            self.state_dim = 1
-            state_size = 1
-        else:
-            raise NotImplementedError('Only discrete and discrete state space are supported!')
+    """
+    面向离散控制的简单多层感知机动作价值网络。
+    """
+
+    def __init__(self, args, controller):
         super(SimpleCritic, self).__init__()
-        self.fc1 = nn.Linear(state_size, args.hidden_size)
+
+        self.controller = controller
+        self.env_scheme = controller.env_scheme
+        self.input_space = controller.input_space
+
+        action_space = self.env_scheme["action"]["space"]
+        if not isinstance(action_space, gym.spaces.Discrete):
+            raise NotImplementedError("SimpleCritic only supports discrete action spaces.")
+
+        action_size = action_space.n
+        input_size, self.input_dim = self._get_input_shape(self.input_space)
+
+        self.fc1 = nn.Linear(input_size, args.hidden_size)
         self.fc2 = nn.Linear(args.hidden_size, args.hidden_size)
         self.fc3 = nn.Linear(args.hidden_size, action_size)
 
-    def forward(self, states):
-        x = F.relu(self.fc1(states))
+    def forward(self, batch):
+        states = batch["input"]
+        flat_states = torch.flatten(states.float(), start_dim=-self.input_dim)
+
+        x = F.relu(self.fc1(flat_states))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
+        x = self.fc3(x)
         return x
 
+    def _get_input_shape(self, input_space):
+        if isinstance(input_space, gym.spaces.Box):
+            return int(torch.prod(torch.tensor(input_space.shape)).item()), len(input_space.shape)
 
+        if isinstance(input_space, gym.spaces.Discrete):
+            return 1, 1
+
+        raise NotImplementedError(f"Input space type {type(input_space)} is not supported.")

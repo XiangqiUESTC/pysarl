@@ -42,7 +42,9 @@ class EpisodeRunner:
             current_input = self.controller.builder.build_timestep(self.buffer, self.t)
             self.buffer.insert(current_input, "input", self.t)
 
-            action = self.controller.select_action(self.buffer, self.t_env, self.t, test_mode=test_mode)
+            current_data = self.buffer.get_episode_data()
+
+            action = self.controller.select_action(current_data, self.t_env, self.t, test_mode=test_mode)
 
             self.buffer.insert(action[0], "action", self.t)
             self.buffer.insert(terminated, "terminated", self.t)

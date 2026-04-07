@@ -1,52 +1,56 @@
-"""
-    全连接的V函数
-"""
+import gymnasium as gym
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
 class FullConnectedValue(nn.Module):
-    def __init__(self, net_args, scheme):
-        # 父类初始化
+    """
+    可配置的多层感知机价值网络。
+    """
+
+    def __init__(self, net_args, controller):
         super(FullConnectedValue, self).__init__()
 
-        # 保存一些参数
-        self.scheme = scheme
+        self.controller = controller
+        self.env_scheme = controller.env_scheme
+        self.input_space = controller.input_space
         self.net_args = net_args
 
-        # 只用计算state的维度即可
-        if scheme.state_space_type == 'continuous':
-            state_size = torch.prod(scheme.continuous_state_shape)
-            self.state_dim = len(scheme.continuous_state_shape)
-        elif scheme.state_space_type == 'discrete':
-            self.state_dim = 1
-            state_size = 1
-        else:
-            raise NotImplementedError('Only discrete and discrete state space are supported!')
-        # 线性层数量
-        self.linear_lays = nn.ModuleList()
+        input_size, self.input_dim = self._get_input_shape(self.input_space)
 
-        n_layers = getattr(net_args, 'n_layers', 2)
-        hidden_dim = getattr(net_args, 'hidden_dim')
-        # 确保类型正确
-        assert isinstance(n_layers, int) and n_layers > 0 and isinstance(hidden_dim, int) and hidden_dim > 0
+        self.linear_layers = nn.ModuleList()
 
-        for i in range(n_layers):
-            if i == 0:
-                # 第一层
-                self.linear_lays.append(nn.Linear(state_size, hidden_dim))
-            elif i == n_layers-1:
-                # 最后一层
-                self.linear_lays.append(nn.Linear(hidden_dim, 1))
+        n_layers = getattr(net_args, "n_layers", 2)
+        hidden_dim = getattr(net_args, "hidden_dim")
+
+        assert isinstance(n_layers, int) and n_layers > 0
+        assert isinstance(hidden_dim, int) and hidden_dim > 0
+
+        for layer_index in range(n_layers):
+            if layer_index == 0:
+                self.linear_layers.append(nn.Linear(input_size, hidden_dim))
+            elif layer_index == n_layers - 1:
+                self.linear_layers.append(nn.Linear(hidden_dim, 1))
             else:
-                self.linear_lays.append(nn.Linear(hidden_dim, hidden_dim))
+                self.linear_layers.append(nn.Linear(hidden_dim, hidden_dim))
 
+    def forward(self, batch):
+        x = batch["input"]
+        x = torch.flatten(x.float(), start_dim=-self.input_dim)
 
-    def forward(self, x):
-        for i, layer in enumerate(self.linear_lays):
+        for layer_index, layer in enumerate(self.linear_layers):
             x = layer(x)
-            # 最后一层不使用激活函数
-            if i < len(self.linear_lays) - 1:
+            if layer_index < len(self.linear_layers) - 1:
                 x = F.relu(x)
+
         return x
+
+    def _get_input_shape(self, input_space):
+        if isinstance(input_space, gym.spaces.Box):
+            return int(torch.prod(torch.tensor(input_space.shape)).item()), len(input_space.shape)
+
+        if isinstance(input_space, gym.spaces.Discrete):
+            return 1, 1
+
+        raise NotImplementedError(f"Input space type {type(input_space)} is not supported.")

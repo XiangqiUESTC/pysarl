@@ -6,6 +6,8 @@ from copy import deepcopy
 from os.path import join
 from types import SimpleNamespace as sn
 
+import gymnasium as gym
+import numpy as np
 import torch
 import yaml
 
@@ -83,3 +85,15 @@ def config_copy(config):
         return [config_copy(v) for v in config]
     else:
         return deepcopy(config)
+
+
+def get_space_shape_and_type(space):
+    if isinstance(space, gym.spaces.Discrete):
+        return (1,), torch.int64
+
+    if isinstance(space, gym.spaces.Box):
+        if np.issubdtype(space.dtype, np.integer):
+            return space.shape, torch.int64
+        return space.shape, torch.float32
+
+    raise NotImplementedError(f"Space type {type(space)} is not supported.")

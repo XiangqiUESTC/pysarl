@@ -1,8 +1,9 @@
 import gymnasium as gym
-import numpy as np
 import torch
+import numpy as np
 from gymnasium.wrappers import TimeLimit
 
+from utils.functions import get_space_shape_and_type
 from wrapper import REGISTRY
 
 dtype_dict = {
@@ -59,8 +60,8 @@ class Gym(gym.Env):
         """
             获取模式,返回一个Scheme类
         """
-        ob_shape, ob_type = self._get_space_shape_and_type(self.game.observation_space)
-        action_shape, action_type = self._get_space_shape_and_type(self.game.action_space)
+        ob_shape, ob_type = get_space_shape_and_type(self.game.observation_space)
+        action_shape, action_type = get_space_shape_and_type(self.game.action_space)
 
         scheme = {
             "state":{

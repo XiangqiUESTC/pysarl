@@ -18,6 +18,9 @@ class DQN:
         self.param = list(self.runner.controller.parameters())
         self.optimizer = optim.Adam(self.param, lr=self.args.lr)
 
+    def can_learn(self):
+        return self.runner.buffer.can_sample(granularity="step")
+
     def learn(self, buffer, t_env, episode_num):
         batch = buffer.sample(granularity="step")
 

@@ -1,7 +1,7 @@
 import os
+import pprint
 from os.path import abspath
 from os.path import dirname
-import pprint
 
 from learners import REGISTER as learner_REGISTRY
 from runners import REGISTRY as runner_REGISTRY
@@ -11,37 +11,26 @@ from utils.logger import MyLogger
 
 def run(ex_run, config, log):
     """
-        Description: 在正式开始实验前再做一些准备，如装配tensorboard
-        Arguments:
-            ex_run: 
-            config: 
-            log: 
+    在正式开始实验前准备日志和配置，然后进入训练流程。
     """
     args = dict_to_namespace(config)
 
-    log.info("实验参数为:")
-    experiment_params = pprint.pformat(config,
-                                       indent=4,
-                                       width=1)
+    log.info("实验参数如下")
+    experiment_params = pprint.pformat(config, indent=4, width=1)
     log.info("\n\n" + experiment_params + "\n")
 
     logger = MyLogger(args, log)
 
-    # 如果要使用tensorboard，在日志实例中装配
     if args.use_tensorboard:
         results_file = os.path.join(dirname(dirname(abspath(__file__))), args.local_results_path)
         logger.setup_tensorboard(results_file)
 
-    # 开始训练!
     training(args, logger)
 
 
 def training(args, logger):
     """
-        Description: 封装强化学习所有流程的函数
-        Arguments:
-            args: args是一个SimpleNamespace对象，由sacred配置项转化而来，它控制整个强化学习流程的各个方面
-            logger: logger是日志器对象
+    封装强化学习训练主循环。
     """
     # 初始化runner,runner会初始化env和agent还有buffer
     runner = runner_REGISTRY[args.runner](args, logger)
@@ -62,11 +51,8 @@ def training(args, logger):
         # runner控制env和agent交互，不同的runner有不同的控制粒度
         runner.run()
 
-        # Todo是否学习应该由学习器返回，而非buffer
-        # 如果满足采样条件，就采样并学习
-        # if buffer.can_sample():
-        #     # 学习方法
-        #     finish_train = learner.learn(buffer, runner.t_env, runner.episode)
+        if learner.can_learn():
+            finish_train = learner.learn(runner.buffer, runner.t_env, runner.episode)
 
         # 进行测试
         if (runner.t_env -  last_test_t) / args.test_interval >=1.0:
@@ -85,5 +71,7 @@ def training(args, logger):
         if (runner.t_env - last_test_t) / args.log_interval >= 1.0:
             pass
 
-    logger.logger.info("训练结束！")
+        if finish_train:
+            break
 
+    logger.logger.info("训练结束")

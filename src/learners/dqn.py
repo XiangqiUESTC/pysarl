@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-import torch
 from torch import optim
 
 
@@ -30,41 +29,29 @@ class DQN:
         states = batch["states"]
         # terminated是用来判断下一状态是否为结束状态的，所以截取时不需要第一个
         terminated = batch["terminated"][:, 1:].float()
+        actions = batch["action"][:, :-1].long()
+        rewards = batch["reward"][:, :-1]
+        valid = batch["valid"][:, :-1]
 
-        # 最后一个动作、reward和filled都是无效的，填充的数据而已
-        actions = batch["actions"][:, :-1]
-        rewards = batch["rewards"][:, :-1]
-        filled = batch["filled"][:, :-1]
-
-        # 获取在线网络估计的Q值,注意取第一个step到倒数第二个step
-        qs = self.runner.controller.forward(states)
-        online_q = qs[:,:-1]
-        # 获取所选动作的q值
+        qs = self.runner.controller.forward(batch)
+        online_q = qs[:, :-1]
         chosen_action_q_val = online_q.gather(2, actions)
 
         if self.args.double_q:
-            # 使用在线网络选择下一状态的最佳动作
-            next_online_q = qs[:,1:]
+            next_online_q = qs[:, 1:]
             next_actions = next_online_q.max(2)[1].unsqueeze(-1)
-
-            next_target_q = self.target_controller.forward(states[:, 1:]).detach()
+            next_target_q = self.target_controller.forward(batch, start_t=1).detach()
             max_next_q_value = next_target_q.gather(2, next_actions)
         else:
-            # 获取目标网络的估计Q值，注意取第二个step取到倒数最后一个step
-            target_q = self.target_controller.forward(states[:, 1:]).detach()
-            # 获取下一状态的最大q值动作的q值
+            target_q = self.target_controller.forward(batch, start_t=1).detach()
             max_next_q_value = target_q.max(2)[0].unsqueeze(-1)
 
+        td_target = rewards + max_next_q_value * (1 - terminated)
+        td_error = chosen_action_q_val - td_target
+        masked_td_error = td_error * valid
 
-        # TD error, 几乎是所有q学习的关键更新指标
-        td_error = chosen_action_q_val - (rewards + max_next_q_value * (1-terminated))
+        loss = (masked_td_error ** 2).sum() / valid.sum().clamp_min(1.0)
 
-        # 忽略填充的步骤
-        masked_td_error = td_error * filled
-
-        loss = (masked_td_error**2).sum()/filled.sum()
-
-        # 清空梯度，反向传播，执行更新
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
@@ -88,4 +75,3 @@ class DQN:
 
     def load_models(self, path):
         pass
-

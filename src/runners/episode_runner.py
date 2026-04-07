@@ -20,6 +20,9 @@ class EpisodeRunner:
         self.args = args
         self.logger = logger
 
+
+        self.last_log_t = -self.args.log_interval - 1
+
         self.t_env = 0
         self.t = 0
         self.episode = 0
@@ -73,10 +76,11 @@ class EpisodeRunner:
 
         self.logger.log_scalar("total_rewards", total_reward, self.t_env)
 
-        if self.episode % self.args.log_interval == 0:
+        if (self.t_env - self.last_log_t) // self.args.log_interval >= 1:
             self.logger.logger.info(
                 f"Episode: {self.episode:>5} t_env: {self.t_env:>10} total_reward: {total_reward}",
             )
+            self.last_log_t = self.t_env
 
         return total_reward
 

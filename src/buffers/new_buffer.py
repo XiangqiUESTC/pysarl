@@ -38,7 +38,7 @@ class BasicBuffer:
         item_tensor = torch.as_tensor(item, dtype=target_slice.dtype, device=target_slice.device)
         self.data[key][episode_id][0][t].copy_(item_tensor.reshape_as(target_slice))
 
-    def get_episode_data(self, key, episode_id=-1):
+    def get_episode_data_by_key(self, key, episode_id=-1):
         return self.data[key][episode_id]
 
     def sample(self, granularity="episode", sample_num=None):
@@ -91,6 +91,13 @@ class BasicBuffer:
             batch["valid"][batch_id, step_index] = 1.0
 
         return batch
+
+    def get_episode_data(self, episode_id=-1):
+        batch_dict = {
+            key: self.get_episode_data_by_key(key, episode_id=episode_id)
+            for key in self.data_scheme.keys()
+        }
+        return batch_dict
 
     def clear(self):
         for key in self.data.keys():

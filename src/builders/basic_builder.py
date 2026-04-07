@@ -73,7 +73,7 @@ class BasicBuilder:
             return data_source[key]
 
         if hasattr(data_source, "get_episode_data"):
-            return data_source.get_episode_data(key, episode_id)
+            return data_source.get_episode_data_by_key(key, episode_id)
 
         return data_source[key][episode_id]
 

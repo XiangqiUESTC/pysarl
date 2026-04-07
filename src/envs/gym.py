@@ -65,29 +65,29 @@ class Gym(gym.Env):
         scheme = {
             "state":{
                 "shape":ob_shape,
-                "type":ob_type,
+                "dtype":ob_type,
                 "space": self.game.observation_space,
             },
             "action": {
                 "shape": action_shape,
-                "type": action_type,
+                "dtype": action_type,
                 "space": self.game.action_space,
             },
             "reward":{
                 "shape": (1,),
-                "type": torch.float32,
+                "dtype": torch.float32,
             },
             "terminated":{
                 "shape": (1,),
-                "type": torch.float32,
+                "dtype": torch.float32,
             },
             "truncated":{
                 "shape": (1,),
-                "type": torch.float32,
+                "dtype": torch.float32,
             },
             "filled": {
                 "shape": (1,),
-                "type": torch.float32,
+                "dtype": torch.float32,
             }
         }
         return scheme

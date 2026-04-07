@@ -1,6 +1,5 @@
 import gymnasium as gym
 import torch
-import numpy as np
 from gymnasium.wrappers import TimeLimit
 
 from utils.functions import get_space_shape_and_type
@@ -112,26 +111,10 @@ class Gym(gym.Env):
     # 保存state
     def set_state(self, state):
         self._state = state
+
     # 获取state
     def get_state(self):
         return self._state
-
-    # 私有方法，用来获得一个space的信息，space是gym定义的几种基本的space的类型
-    def _get_space_shape_and_type(self, space):
-        if isinstance(space, gym.spaces.Discrete):
-            # 如果是离散类型，返回discrete字符和离散的个数
-            return (1,), torch.int64
-        elif isinstance(space, gym.spaces.Box):
-            # 如果是连续类型，continuous字符和维度
-            if np.issubdtype(space.dtype, np.integer):
-                return space.shape, torch.int64
-            return space.shape, torch.float32
-        else:
-            # 还没有处理其他类型space的代码，遇到其它类型的代码就抛异常
-            raise NotImplementedError(
-                f"The space type {type(space)} defined by gym in game {self.env_args.game_name} "
-                f"is not considered yet!"
-            )
 
     def render(self):
         pass

@@ -58,23 +58,28 @@ class EpisodeRunner:
 
         self.episode_done = False
 
-        self.buffer.insert(self.current_state, "state", self.t)
+        step_transaction = {"state": self.current_state}
 
         current_input = self.controller.builder.build_timestep(self.buffer, self.t)
-        self.buffer.insert(current_input, "input", self.t)
+
+        step_transaction["input"] = current_input
 
         current_data = self.buffer.get_episode_data()
 
         action = self.controller.select_action(current_data, self.t_env, self.t, test_mode=test_mode)
 
         self.buffer.insert(action[0], "action", self.t)
-        self.buffer.insert(self.current_terminated, "terminated", self.t)
-        self.buffer.insert(self.current_truncated, "truncated", self.t)
-        self.buffer.insert(torch.tensor([1.0]), "filled", self.t)
+        step_transaction["action"] = action[0]
+
+        step_transaction["terminated"] = self.current_terminated
+        step_transaction["truncated"] = self.current_truncated
+        step_transaction["filled"] = torch.tensor([1.0])
 
         next_state, reward, terminated, truncated, *_ = self.env.step(action.item())
         self.current_total_reward += reward
-        self.buffer.insert(reward, "reward", self.t)
+
+        step_transaction["reward"] = torch.tensor([1.0])
+        self.buffer.insert_step_transaction(step_transaction, self.t)
 
         self.current_state = next_state
         self.current_terminated = terminated

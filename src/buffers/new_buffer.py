@@ -16,8 +16,15 @@ class BasicBuffer:
         self.max_buffer_size = getattr(args, "buffer_size", None)
         self.default_sample_num = getattr(args, "batch_size", 1)
 
+        # buffer里面有效的episode的统计
         self.episode_num = 0
+        # buffer的数据，字典类型
         self.data = {}
+        # buffer里面有效的step的统计
+        self.step_num = 0
+
+        # 存每个episode的step计数
+        self.episode_steps = deque(maxlen=self.max_buffer_size)
 
         for key in self.data_scheme.keys():
             self.data[key] = deque(maxlen=self.max_buffer_size)
@@ -29,14 +36,35 @@ class BasicBuffer:
             self.data[key].append(new_tensor)
 
         if self.max_buffer_size is not None:
-            self.episode_num = min(self.episode_num + 1, self.max_buffer_size)
+            if self.episode_num < self.max_buffer_size:
+                self.episode_num += 1
+            else:
+                # 如果要弹出某个episode,那么就要减小step_num
+                self.step_num -= self.episode_steps[0]
         else:
             self.episode_num += 1
+
+        self.episode_steps.append(0)
+
+        assert self.step_num == sum(self.episode_steps)
 
     def insert(self, item, key, t, episode_id=-1):
         target_slice = self.data[key][episode_id][0][t]
         item_tensor = torch.as_tensor(item, dtype=target_slice.dtype, device=target_slice.device)
         self.data[key][episode_id][0][t].copy_(item_tensor.reshape_as(target_slice))
+
+    def insert_step_transaction(self, step_transaction, t, episode_id=-1):
+        # 数据必须一致, transaction的keys必须等于data_scheme的keys
+        assert t == self.episode_steps[episode_id]
+        assert step_transaction.keys() == self.data_scheme.keys()
+        for key, item in step_transaction.items():
+            target_slice = self.data[key][episode_id][0][t]
+            item_tensor = torch.as_tensor(item, dtype=target_slice.dtype, device=target_slice.device)
+            self.data[key][episode_id][0][t].copy_(item_tensor.reshape_as(target_slice))
+
+        # 增加步数计数器
+        self.episode_steps[episode_id] += 1
+        self.step_num += 1
 
     def get_episode_data_by_key(self, key, episode_id=-1):
         return self.data[key][episode_id]
@@ -60,7 +88,7 @@ class BasicBuffer:
             return self.episode_num >= sample_num
 
         if granularity == "step":
-            return len(self._collect_step_candidates()) >= sample_num
+            return self.step_num >= sample_num
 
         raise ValueError(f"Unsupported sample granularity: {granularity}")
 

@@ -16,9 +16,9 @@ class ActorCritic:
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=args.critic_lr)
 
     def can_learn(self):
-        return self.runner.buffer.can_sample(granularity="episode")
+        return self.runner.episode_done and self.runner.buffer.can_sample(granularity="episode")
 
-    def learn(self, buffer, t_env, episode_num):
+    def learn(self):
         raise NotImplementedError("ActorCritic.learn is not implemented yet.")
 
     def cuda(self):

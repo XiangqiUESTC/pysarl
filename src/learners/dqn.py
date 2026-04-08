@@ -21,8 +21,8 @@ class DQN:
     def can_learn(self):
         return self.runner.buffer.can_sample(granularity="step")
 
-    def learn(self, buffer, t_env, episode_num):
-        batch = buffer.sample(granularity="step")
+    def learn(self):
+        batch = self.runner.buffer.sample(granularity="step")
 
         terminated = batch["terminated"][:, 1:].float()
         actions = batch["action"][:, :-1].long()
@@ -57,11 +57,11 @@ class DQN:
         loss.backward()
         self.optimizer.step()
 
-        self.logger.log_stats("loss", loss.item(), t_env)
+        self.logger.log_stats("loss", loss.item(), self.runner.t_env)
 
-        if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
+        if (self.runner.episode - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_target_network()
-            self.last_target_update_episode = episode_num
+            self.last_target_update_episode = self.runner.episode
 
     def _update_target_network(self):
         self.target_controller.agent.load_state_dict(self.runner.controller.agent.state_dict())

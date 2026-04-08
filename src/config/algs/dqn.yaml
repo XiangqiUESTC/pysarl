@@ -14,5 +14,7 @@ epsilon_start: 1.0
 epsilon_finish: 0.01
 epsilon_anneal_time: 50000
 
+double_q: false
+
 batch_size: 32
 buffer_size: 32

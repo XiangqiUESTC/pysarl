@@ -49,13 +49,13 @@ def training(args, logger):
     while runner.t_env <= args.t_max:
 
         # runner控制env和agent交互，不同的runner有不同的控制粒度
-        runner.run()
+        runner.step()
 
         if learner.can_learn():
-            finish_train = learner.learn(runner.buffer, runner.t_env, runner.episode)
+            finish_train = learner.learn()
 
         # 进行测试
-        if (runner.t_env -  last_test_t) / args.test_interval >=1.0:
+        if runner.episode_done and (runner.t_env -  last_test_t) / args.test_interval >=1.0:
             # 计算测试次数
             n_test_runs = max(1, args.test_nepisode // runner.batch_size)
             # 开始测试

@@ -19,10 +19,10 @@ class Reinforce:
         self.optimizer = optim.Adam(controller.parameters(), lr=args.lr)
 
     def can_learn(self):
-        return self.runner.buffer.can_sample(granularity="episode")
+        return self.runner.episode_done and self.runner.buffer.can_sample(granularity="episode")
 
-    def learn(self, buffer, t_env, episode_num):
-        batch = buffer.sample(granularity="episode")
+    def learn(self):
+        batch = self.runner.buffer.sample(granularity="episode")
 
         action = batch["action"][:, :-1]
         reward = batch["reward"][:, :-1]
@@ -57,7 +57,7 @@ class Reinforce:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        buffer.clear()
+        self.runner.buffer.clear()
 
         if self.args.baseline:
             return_sample = (reward * valid).flip(1).cumsum(dim=1).flip(1)

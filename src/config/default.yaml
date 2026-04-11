@@ -1,7 +1,7 @@
 # --- Logging options ---
 use_tensorboard: True
 local_results_path: "results"
-log_interval: 5000
+log_interval: 2000
 
 # --- RL hyperparameters ---
 gamma: 0.99

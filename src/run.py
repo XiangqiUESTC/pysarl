@@ -1,7 +1,11 @@
+import random
 import os
 import pprint
 from os.path import abspath
 from os.path import dirname
+
+import numpy as np
+import torch
 
 from learners import REGISTER as learner_REGISTRY
 from runners import REGISTRY as runner_REGISTRY
@@ -9,11 +13,29 @@ from utils.functions import dict_to_namespace
 from utils.logger import MyLogger
 
 
+def set_random_seed(seed):
+    if seed is None:
+        return
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
 def run(ex_run, config, log):
     """
     在正式开始实验前准备日志和配置，然后进入训练流程。
     """
     args = dict_to_namespace(config)
+    set_random_seed(getattr(args, "seed", None))
 
     log.info("实验参数如下")
     experiment_params = pprint.pformat(config, indent=4, width=1)
@@ -59,8 +81,12 @@ def training(args, logger):
             # 计算测试次数
             n_test_runs = max(1, args.test_nepisode // runner.batch_size)
             # 开始测试
+            test_returns = []
             for _ in range(n_test_runs):
-                runner.run(test_mode=True)
+                test_returns.append(runner.run(test_mode=True))
+            mean_test_return = sum(test_returns) / len(test_returns)
+            logger.log_stats("test_return_mean", mean_test_return, runner.t_env)
+            logger.logger.info(f"Test t_env: {runner.t_env:>10} test_return_mean: {mean_test_return:.2f}")
             last_test_t = runner.t_env
 
         # 进行模型的保存

@@ -36,6 +36,7 @@ class EpisodeRunner:
         self.current_state = None
         self.current_terminated = False
         self.current_truncated = False
+        self.reset_count = 0
 
         self.setup()
 
@@ -65,10 +66,11 @@ class EpisodeRunner:
         step_transaction["input"] = current_input
 
         current_data = self.buffer.get_episode_data()
+        self._write_current_step(current_data, "state", self.current_state)
+        self._write_current_step(current_data, "input", current_input)
 
         action = self.controller.select_action(current_data, self.t_env, self.t, test_mode=test_mode)
 
-        self.buffer.insert(action[0], "action", self.t)
         step_transaction["action"] = action[0]
 
         step_transaction["terminated"] = self.current_terminated
@@ -78,7 +80,7 @@ class EpisodeRunner:
         next_state, reward, terminated, truncated, *_ = self.env.step(action.item())
         self.current_total_reward += reward
 
-        step_transaction["reward"] = torch.tensor([1.0])
+        step_transaction["reward"] = reward
         self.buffer.insert_step_transaction(step_transaction, self.t)
 
         self.current_state = next_state
@@ -109,7 +111,12 @@ class EpisodeRunner:
         self.buffer = buffer_REGISTRY[self.args.buffer](self.args, self.buffer_scheme)
 
     def reset(self):
-        self.env.reset()
+        reset_seed = None
+        if getattr(self.args, "seed", None) is not None:
+            reset_seed = self.args.seed + self.reset_count
+            self.reset_count += 1
+
+        self.env.reset(seed=reset_seed)
         self.t = 0
 
     def _start_episode(self, test_mode=False):
@@ -121,7 +128,7 @@ class EpisodeRunner:
         self.current_total_reward = 0
         self.current_state = self.env.get_state()
         self.current_terminated = self.env.terminated
-        self.current_truncated = self.env.terminated
+        self.current_truncated = False
         self.episode_active = True
         self.episode_done = False
 
@@ -158,3 +165,8 @@ class EpisodeRunner:
         self.episode_active = False
         self.episode_done = True
         return total_reward
+
+    def _write_current_step(self, batch_dict, key, item):
+        target_slice = batch_dict[key][0, self.t]
+        item_tensor = torch.as_tensor(item, dtype=target_slice.dtype, device=target_slice.device)
+        target_slice.copy_(item_tensor.reshape_as(target_slice))

@@ -105,12 +105,11 @@ class BasicBuffer:
         self._assert_non_empty()
 
         sample_num = self._resolve_sample_num(sample_num)
-        step_candidates = self._collect_step_candidates()
-
-        if len(step_candidates) == 0:
+        if self.step_num == 0:
             raise RuntimeError("No valid step can be sampled from the buffer.")
 
-        sampled_step_candidates = self._sample_items(step_candidates, sample_num)
+        step_indices = self._sample_indices(self.step_num, sample_num)
+        sampled_step_candidates = self._locate_step_indices(step_indices)
         episode_indices = [episode_id for episode_id, _ in sampled_step_candidates]
         batch = self._build_batch_from_episode_indices(episode_indices)
         batch["valid"] = torch.zeros_like(batch["filled"])
@@ -132,10 +131,15 @@ class BasicBuffer:
             self.data[key].clear()
 
         self.episode_num = 0
+        self.step_num = 0
+        self.episode_steps.clear()
 
     def discard_last_episode(self):
         if self.episode_num == 0:
             return
+
+        self.step_num -= self.episode_steps[-1]
+        self.episode_steps.pop()
 
         for key in self.data.keys():
             if len(self.data[key]) > 0:
@@ -164,18 +168,6 @@ class BasicBuffer:
 
         return batch
 
-    def _collect_step_candidates(self):
-        step_candidates = []
-
-        for episode_id in range(self.episode_num):
-            filled = self.data["filled"][episode_id][0, :-1, 0]
-            valid_step_indices = torch.nonzero(filled > 0, as_tuple=False).squeeze(-1).tolist()
-
-            for step_index in valid_step_indices:
-                step_candidates.append((episode_id, step_index))
-
-        return step_candidates
-
     def _sample_indices(self, population_size, sample_num):
         candidates = list(range(population_size))
         return self._sample_items(candidates, sample_num)
@@ -185,3 +177,20 @@ class BasicBuffer:
             return random.sample(candidates, sample_num)
 
         return random.choices(candidates, k=sample_num)
+
+    def _locate_step_indices(self, step_indices):
+        located_steps = [None] * len(step_indices)
+        sorted_step_indices = sorted(enumerate(step_indices), key=lambda item: item[1])
+
+        cumulative_step_num = 0
+        episode_id = 0
+
+        for original_id, flat_step_index in sorted_step_indices:
+            while flat_step_index >= cumulative_step_num + self.episode_steps[episode_id]:
+                cumulative_step_num += self.episode_steps[episode_id]
+                episode_id += 1
+
+            step_index = flat_step_index - cumulative_step_num
+            located_steps[original_id] = (episode_id, step_index)
+
+        return located_steps

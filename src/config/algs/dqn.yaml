@@ -4,17 +4,19 @@ controller: "basic_controller"
 buffer: "basic_buffer"
 learner: "dqn"
 
-lr: 0.001
-target_update_interval: 10
+lr: 0.0003
+target_update_interval: 2000
 
 agent: "simple_critic"
 hidden_size: 64
 action_selector: "epsilon_greedy"
 epsilon_start: 1.0
 epsilon_finish: 0.01
-epsilon_anneal_time: 50000
+epsilon_anneal_time: 10000
 
-double_q: false
+double_q: true
 
-batch_size: 32
-buffer_size: 32
+batch_size: 128
+buffer_size: 512
+learning_starts: 5000
+learn_every_steps: 4

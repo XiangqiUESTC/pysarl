@@ -40,7 +40,7 @@ class Reinforce:
             log_action_prob_cumsum = (log_chosen_action_probs * valid).cumsum(dim=1)
             loss = -(reward * log_action_prob_cumsum * valid).sum() / valid.sum().clamp_min(1.0)
         elif self.args.formula == 3:
-            return_sample = (reward * valid).flip(1).cumsum(dim=1).flip(1)
+            return_sample = self._build_discounted_returns(reward, valid)
 
             if self.args.baseline:
                 critic_batch = {
@@ -60,17 +60,20 @@ class Reinforce:
         self.runner.buffer.clear()
 
         if self.args.baseline:
-            return_sample = (reward * valid).flip(1).cumsum(dim=1).flip(1)
+            return_sample = self._build_discounted_returns(reward, valid)
             critic_batch = {
                 key: value[:, :-1]
                 for key, value in batch.items()
             }
-            value_prediction = self.critic(critic_batch)
-            value_loss = ((return_sample - value_prediction) ** 2 * valid).sum() / valid.sum().clamp_min(1.0)
+            value_train_iters = getattr(self.args, "value_train_iters", 1)
 
-            self.critic_optimizer.zero_grad()
-            value_loss.backward()
-            self.critic_optimizer.step()
+            for _ in range(value_train_iters):
+                value_prediction = self.critic(critic_batch)
+                value_loss = ((return_sample - value_prediction) ** 2 * valid).sum() / valid.sum().clamp_min(1.0)
+
+                self.critic_optimizer.zero_grad()
+                value_loss.backward()
+                self.critic_optimizer.step()
 
     def cuda(self):
         self.runner.controller.cuda()
@@ -83,3 +86,13 @@ class Reinforce:
 
     def load_models(self, path):
         pass
+
+    def _build_discounted_returns(self, reward, valid):
+        discounted_returns = torch.zeros_like(reward)
+        running_return = torch.zeros_like(reward[:, 0])
+
+        for t in range(reward.shape[1] - 1, -1, -1):
+            running_return = (reward[:, t] + self.args.gamma * running_return) * valid[:, t]
+            discounted_returns[:, t] = running_return
+
+        return discounted_returns

@@ -1,4 +1,4 @@
-from .episode_runner import EpisodeRunner
+from .serial_runner import SerialRunner
 REGISTRY = {
-    "episode": EpisodeRunner
+    "serial": SerialRunner
 }

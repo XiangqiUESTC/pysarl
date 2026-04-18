@@ -2,14 +2,11 @@
     一些工具函数
 """
 from collections.abc import Mapping
-from copy import deepcopy
-from os.path import join
 from types import SimpleNamespace as sn
 
 import gymnasium as gym
 import numpy as np
 import torch
-import yaml
 
 
 def recursive_dict_update(dst_dict, src_dist):
@@ -27,30 +24,11 @@ def recursive_dict_update(dst_dict, src_dist):
                 dst_dict[key] = value
     return dst_dict
 
-def get_config(params, arg_name, subfolder):
-    """
-        Description: 在命令行参数中寻找args_name=xxx的项，然后去subfolder文件夹下读取对应的配置subfolder/xxx.yaml
-        Arguments:
-            params: 命令行参数
-            arg_name: 提供更新内容的字典
-            subfolder: 子配置文件夹
-    """
-    config_name = None
-    for i, value in enumerate(params):
-        if value.split("=")[0] == arg_name:
-            config_name = value.split("=")[1]
-            del params[i]
-            break
-
-    if config_name is not None:
-        with open(join(subfolder, f"{config_name}.yaml"), "r") as f:
-            try:
-                config_dict = yaml.safe_load(f)
-            except yaml.YAMLError as _exc:
-                assert False, "{}.yaml error: {}".format(config_name, _exc)
-        return config_dict
-    else:
-        return {}
+def get_cli_update_value(params, key):
+    for param in params:
+        if param.split("=", 1)[0] == key:
+            return param.split("=", 1)[1]
+    return None
 
 def dict_to_namespace(dictionary):
     """
@@ -73,23 +51,21 @@ def dict_to_namespace(dictionary):
         # 如果不是字典或列表，直接返回值
         return dictionary
 
-def config_copy(config):
-    """
-        Description: 复制一个config，config里面可能是字典列表的多重嵌套
-        Arguments:
-            config: 一个配置项
-    """
-    if isinstance(config, dict):
-        return {k: config_copy(v) for k, v in config.items()}
-    elif isinstance(config, list):
-        return [config_copy(v) for v in config]
-    else:
-        return deepcopy(config)
-
 
 def get_space_shape_and_type(space):
     if isinstance(space, gym.spaces.Discrete):
         return (1,), torch.int64
+
+    if isinstance(space, gym.spaces.MultiDiscrete):
+        return tuple(space.shape), torch.int64
+
+    if isinstance(space, gym.spaces.MultiBinary):
+        return tuple(space.shape), torch.int64
+
+    if isinstance(space, gym.spaces.Tuple):
+        if all(isinstance(subspace, gym.spaces.Discrete) for subspace in space.spaces):
+            return (len(space.spaces),), torch.int64
+        raise NotImplementedError(f"Tuple space {space} is not supported.")
 
     if isinstance(space, gym.spaces.Box):
         if np.issubdtype(space.dtype, np.integer):

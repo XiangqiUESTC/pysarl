@@ -1,0 +1,90 @@
+actor_critic:
+  runner: "serial"
+  controller: "basic_controller"
+  buffer: "basic_buffer"
+  learner: "actor_critic"
+  buffer_size: 4
+  buffer_size_mode: "episode"
+
+  agent: "simple_actor"
+  critic: "simple_critic"
+  action_selector: "policy_distribution"
+  hidden_size: 256
+
+  gamma: 0.99
+  actor_lr: 0.001
+  critic_lr: 0.001
+
+dqn:
+  runner: "serial"
+
+  controller: "basic_controller"
+  buffer: "basic_buffer"
+  learner: "dqn"
+
+  lr: 0.001
+  gamma: 0.99
+  target_update_interval: 100
+
+  agent: "simple_critic"
+  hidden_size: 128
+  action_selector: "epsilon_greedy"
+  epsilon_start: 1.0
+  epsilon_finish: 0.01
+  epsilon_anneal_time: 4000
+
+  batch_size: 64
+  buffer_size: 10000
+  buffer_size_mode: "step"
+  learning_starts: 500
+  learn_every_steps: 1
+
+q_learning:
+  controller: "basic_controller"
+  critic: "q_table"
+  q_init_val: 0.0
+  action_selector: "epsilon_greedy"
+  epsilon_start: 1.0
+  epsilon_finish: 0.05
+  epsilon_anneal_time: 50000
+
+  runner: "default"
+  agent_out_put_type: "value"
+
+reinforce:
+  runner: "serial"
+  controller: "basic_controller"
+  buffer: "basic_buffer"
+  learner: "reinforce"
+
+  batch_size: 2
+  buffer_size: 2
+  buffer_size_mode: "episode"
+  t_max: 240000
+
+  agent: "simple_actor"
+
+  baseline: true
+  critic_lr: 0.01
+  value_train_iters: 10
+  critic:
+    name: "full_connect_value"
+    hidden_dim: 16
+    n_layers: 3
+
+  hidden_size: 64
+  action_selector: "policy_distribution"
+
+  formula: 3
+
+sarsa:
+  controller: "basic_controller"
+  critic: "q_table"
+  q_init_val: 0.0
+  action_selector: "epsilon_greedy"
+  epsilon_start: 1.0
+  epsilon_finish: 0.05
+  epsilon_anneal_time: 50000
+
+  runner: "default"
+  agent_out_put_type: "value"

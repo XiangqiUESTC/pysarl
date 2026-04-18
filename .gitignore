@@ -9,3 +9,5 @@ results
 **/test.py
 
 **/__pycache__/**
+
+dev_logs/**

@@ -1,0 +1,23 @@
+game_name: "Taxi-v3"
+max_episode_steps: 200
+
+t_max: 150000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    gamma: 1.0
+    lr: 0.0005
+    epsilon_anneal_time: 50000
+    buffer_size: 20000
+    learning_starts: 2000
+    target_update_interval: 200
+    hidden_size: 128
+  reinforce:
+    batch_size: 16
+    buffer_size: 16
+    lr: 0.001
+    critic_lr: 0.001
+    hidden_size: 128
+    t_max: 200000

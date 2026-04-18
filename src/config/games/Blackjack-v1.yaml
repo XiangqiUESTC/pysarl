@@ -1,7 +1,5 @@
 game_name: "Blackjack-v1"
-
-env_args:
-  max_episode_steps: 100
+max_episode_steps: 100
 
 t_max: 30000
 

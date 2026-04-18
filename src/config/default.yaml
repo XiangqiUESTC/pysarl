@@ -30,3 +30,8 @@ dtype: "float32"
 name: "rl_learn"
 
 default_wrappers: ["all_to_tensor",]
+
+env: "gym"
+game_name: "CartPole-v1"
+max_episode_steps: 500
+t_max: 200000

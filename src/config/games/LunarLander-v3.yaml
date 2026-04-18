@@ -1,7 +1,5 @@
 game_name: "LunarLander-v3"
-
-env_args:
-  max_episode_steps: 1000
+max_episode_steps: 1000
 
 t_max: 400000
 

@@ -1,7 +1,5 @@
 game_name: "FrozenLake8x8-v1"
-
-env_args:
-  max_episode_steps: 200
+max_episode_steps: 200
 
 t_max: 200000
 

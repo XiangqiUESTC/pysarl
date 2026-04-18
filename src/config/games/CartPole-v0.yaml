@@ -1,7 +1,5 @@
 game_name: "CartPole-v0"
-
-env_args:
-  max_episode_steps: 200
+max_episode_steps: 200
 
 t_max: 25000
 

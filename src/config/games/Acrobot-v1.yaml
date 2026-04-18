@@ -1,7 +1,5 @@
 game_name: "Acrobot-v1"
-
-env_args:
-  max_episode_steps: 500
+max_episode_steps: 500
 
 t_max: 300000
 

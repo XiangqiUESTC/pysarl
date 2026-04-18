@@ -1,0 +1,14 @@
+game_name: "CartPole-v0"
+
+env_args:
+  max_episode_steps: 200
+
+t_max: 25000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    lr: 0.0005
+    epsilon_anneal_time: 2500
+    buffer_size: 2000

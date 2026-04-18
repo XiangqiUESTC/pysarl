@@ -1,0 +1,24 @@
+game_name: "FrozenLake-v1"
+
+env_args:
+  max_episode_steps: 100
+
+t_max: 100000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    lr: 0.001
+    epsilon_anneal_time: 30000
+    buffer_size: 5000
+    learning_starts: 500
+    target_update_interval: 200
+    hidden_size: 64
+  reinforce:
+    batch_size: 32
+    buffer_size: 32
+    lr: 0.001
+    critic_lr: 0.001
+    hidden_size: 64
+    t_max: 150000

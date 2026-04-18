@@ -1,0 +1,23 @@
+game_name: "Acrobot-v1"
+
+env_args:
+  max_episode_steps: 500
+
+t_max: 300000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    lr: 0.0005
+    epsilon_anneal_time: 20000
+    buffer_size: 5000
+    learning_starts: 1000
+    target_update_interval: 200
+  reinforce:
+    batch_size: 8
+    buffer_size: 8
+    lr: 0.0005
+    critic_lr: 0.001
+    hidden_size: 128
+    t_max: 300000

@@ -1,0 +1,26 @@
+game_name: "CliffWalking-v0"
+
+env_args:
+  max_episode_steps: 100
+
+t_max: 80000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    lr: 0.001
+    epsilon_anneal_time: 20000
+    buffer_size: 5000
+    learning_starts: 500
+    target_update_interval: 200
+    hidden_size: 64
+  reinforce:
+    gamma: 1.0
+    batch_size: 8
+    buffer_size: 8
+    lr: 0.0005
+    critic_lr: 0.001
+    hidden_size: 128
+    value_train_iters: 20
+    t_max: 100000

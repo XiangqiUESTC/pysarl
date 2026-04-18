@@ -1,0 +1,27 @@
+game_name: "Blackjack-v1"
+
+env_args:
+  max_episode_steps: 100
+
+t_max: 30000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    gamma: 1.0
+    lr: 0.0005
+    epsilon_anneal_time: 10000
+    buffer_size: 10000
+    learning_starts: 1000
+    target_update_interval: 500
+    hidden_size: 128
+  reinforce:
+    gamma: 1.0
+    baseline: false
+    formula: 1
+    batch_size: 32
+    buffer_size: 32
+    lr: 0.001
+    hidden_size: 64
+    t_max: 30000

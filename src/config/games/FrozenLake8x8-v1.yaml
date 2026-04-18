@@ -1,0 +1,24 @@
+game_name: "FrozenLake8x8-v1"
+
+env_args:
+  max_episode_steps: 200
+
+t_max: 200000
+
+env_wrappers: []
+
+alg_args:
+  dqn:
+    lr: 0.0005
+    epsilon_anneal_time: 80000
+    buffer_size: 10000
+    learning_starts: 1000
+    target_update_interval: 200
+    hidden_size: 128
+  reinforce:
+    batch_size: 32
+    buffer_size: 32
+    lr: 0.001
+    critic_lr: 0.001
+    hidden_size: 128
+    t_max: 200000

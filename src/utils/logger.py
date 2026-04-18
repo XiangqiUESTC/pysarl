@@ -29,8 +29,6 @@ class MyLogger:
     def log_scalar(self, tag, value, step):
         if self.writer is not None:
             self.writer.add_scalar(tag, value, step)
-        else:
-            assert False, 'Config use_tensorboard is set to False'
 
 def get_logger():
     logger = logging.getLogger()

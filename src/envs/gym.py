@@ -19,8 +19,7 @@ class Gym(gym.Env):
             初始化方法
         """
         self.args = args
-        self.env_args = args.env_args
-        self.game_name = args.env_args.game_name
+        self.game_name = args.game_name
         self.device = args.device
         self.dtype = dtype_dict[args.dtype]
 
@@ -32,7 +31,7 @@ class Gym(gym.Env):
         else:
             game = gym.make(self.game_name)
 
-        max_episode_steps = args.env_args.max_episode_steps
+        max_episode_steps = args.max_episode_steps
         game = TimeLimit(game, max_episode_steps=max_episode_steps)
 
         # 添加wrapper
@@ -93,7 +92,7 @@ class Gym(gym.Env):
         return scheme
 
     def get_max_episode_steps(self):
-        return self.args.env_args.max_episode_steps
+        return self.args.max_episode_steps
 
     def step(self, action):
         state, reward, terminated, truncated ,info = self.game.step(action)

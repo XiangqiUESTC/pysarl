@@ -35,12 +35,17 @@ class Gym(gym.Env):
         game = TimeLimit(game, max_episode_steps=max_episode_steps)
 
         # 添加wrapper
-        for wrapper_name in args.default_wrappers:
+        for wrapper_name in args.env_wrappers:
             wrapper = REGISTRY[wrapper_name]
             game = wrapper(game)
 
         # 添加wrapper
-        for wrapper_name in args.env_wrappers:
+        for wrapper_name in args.alg_env_wrappers:
+            wrapper = REGISTRY[wrapper_name]
+            game = wrapper(game)
+
+        # 添加wrapper
+        for wrapper_name in args.default_wrappers:
             wrapper = REGISTRY[wrapper_name]
             game = wrapper(game)
 

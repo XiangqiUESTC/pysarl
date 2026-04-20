@@ -9,12 +9,13 @@ alg_args:
   dqn:
     lr: 0.0005
     epsilon_anneal_time: 20000
-    buffer_size: 5000
+    sample_step_num: 64
+    max_buffer_steps: 5000
     learning_starts: 1000
     target_update_interval: 200
   reinforce:
-    batch_size: 8
-    buffer_size: 8
+    sample_episode_num: 8
+    max_buffer_episodes: 8
     lr: 0.0005
     critic_lr: 0.001
     hidden_size: 128

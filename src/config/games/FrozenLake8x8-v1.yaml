@@ -10,14 +10,15 @@ alg_args:
     wrapper: ["state_to_one_hot"]
     lr: 0.0005
     epsilon_anneal_time: 80000
-    buffer_size: 10000
+    sample_step_num: 64
+    max_buffer_steps: 10000
     learning_starts: 1000
     target_update_interval: 200
     hidden_size: 128
   reinforce:
     wrapper: ["state_to_one_hot"]
-    batch_size: 32
-    buffer_size: 32
+    sample_episode_num: 32
+    max_buffer_episodes: 32
     lr: 0.001
     critic_lr: 0.001
     hidden_size: 128

@@ -11,14 +11,15 @@ alg_args:
     gamma: 1.0
     lr: 0.0005
     epsilon_anneal_time: 50000
-    buffer_size: 20000
+    sample_step_num: 64
+    max_buffer_steps: 20000
     learning_starts: 2000
     target_update_interval: 200
     hidden_size: 128
   reinforce:
     wrapper: ["state_to_one_hot"]
-    batch_size: 16
-    buffer_size: 16
+    sample_episode_num: 16
+    max_buffer_episodes: 16
     lr: 0.001
     critic_lr: 0.001
     hidden_size: 128

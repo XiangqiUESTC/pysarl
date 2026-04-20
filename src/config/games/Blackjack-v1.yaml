@@ -11,7 +11,8 @@ alg_args:
     gamma: 1.0
     lr: 0.0005
     epsilon_anneal_time: 10000
-    buffer_size: 10000
+    sample_step_num: 64
+    max_buffer_steps: 10000
     learning_starts: 1000
     target_update_interval: 500
     hidden_size: 128
@@ -20,8 +21,8 @@ alg_args:
     gamma: 1.0
     baseline: false
     formula: 1
-    batch_size: 32
-    buffer_size: 32
+    sample_episode_num: 32
+    max_buffer_episodes: 32
     lr: 0.001
     hidden_size: 64
     t_max: 30000

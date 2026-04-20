@@ -81,6 +81,7 @@ def training(args, logger):
             # 计算测试次数
             n_test_runs = max(1, args.test_nepisode // runner.batch_size)
             # 开始测试
+            runner.start_test_phase()
             test_returns = []
             for _ in range(n_test_runs):
                 test_returns.append(runner.run(test_mode=True))

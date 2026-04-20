@@ -1,15 +1,12 @@
+import gymnasium as gym
 import numpy as np
 import torch
-import gymnasium as gym
 
 
 class BasicBuilder:
     """
     根据原始轨迹字段构造并缓存每个时间步的输入。
-
-    这里的 `input` 只表示由状态派生出来的特征；
-    原始 `action` 仍然保留在 batch 字典里，交给智能体自己决定
-    是否以及如何融合动作历史。
+    当前 `input` 只由状态派生，动作仍保留在 batch 字典里。
     """
 
     def __init__(self, args, env_scheme):
@@ -17,6 +14,7 @@ class BasicBuilder:
         self.env_scheme = env_scheme
 
         self.state_space = env_scheme["state"]["space"]
+        self.state_shape = tuple(env_scheme["state"]["shape"])
         self.action_space = env_scheme["action"]["space"]
 
         self.history_frame_num = getattr(args, "history_frame_num", 0)
@@ -31,12 +29,6 @@ class BasicBuilder:
         self.output_space = self._build_output_space()
 
     def build_timestep(self, data_source, t):
-        """
-        构造某一个时间步真正要写入缓冲区的输入内容。
-
-        这个接口只面向单条在线轨迹，返回值不再额外包裹
-        batch 维和 time 维。
-        """
         timestep_input = self._build_batched_timestep(data_source, t)
 
         if timestep_input.shape[0] != 1:
@@ -48,9 +40,6 @@ class BasicBuilder:
         return timestep_input[0]
 
     def build_batch(self, data_source, start_t=0, end_t=None):
-        """
-        按 `[batch, time, ...]` 的布局构造一段输入序列。
-        """
         if isinstance(data_source, dict) and "input" in data_source:
             return data_source["input"][:, start_t:end_t]
 
@@ -78,7 +67,6 @@ class BasicBuilder:
         return data_source[key][episode_id]
 
     def _build_output_space(self):
-        # 这里的 `input` 现在只由状态构成，动作仍保留为原始字段。
         if self.history_frame_num == 0:
             return self.state_space
 
@@ -95,7 +83,7 @@ class BasicBuilder:
                 dtype=self.state_space.dtype,
             )
 
-        input_dim = self._space_flat_dim(self.state_space) * (self.history_frame_num + 1)
+        input_dim = int(np.prod(self.state_shape)) * (self.history_frame_num + 1)
 
         return gym.spaces.Box(
             low=-np.inf,
@@ -105,9 +93,6 @@ class BasicBuilder:
         )
 
     def _build_batched_timestep(self, data_source, t):
-        """
-        以 `[batch, ...]` 的布局构造某一个时间步的输入。
-        """
         if isinstance(data_source, dict) and "input" in data_source:
             return data_source["input"][:, t]
 
@@ -136,12 +121,3 @@ class BasicBuilder:
 
     def _preserve_image_structure(self):
         return isinstance(self.state_space, gym.spaces.Box) and len(self.state_space.shape) == 3
-
-    def _space_flat_dim(self, space):
-        if isinstance(space, gym.spaces.Box):
-            return int(np.prod(space.shape))
-
-        if isinstance(space, gym.spaces.Discrete):
-            return 1
-
-        raise NotImplementedError(f"State space type {type(space)} is not supported by BasicBuilder.")

@@ -30,6 +30,8 @@ dtype: "float32"
 name: "rl_learn"
 
 default_wrappers: ["all_to_tensor",]
+env_wrappers: []
+alg_env_wrappers: []
 
 env: "gym"
 game_name: "CartPole-v1"

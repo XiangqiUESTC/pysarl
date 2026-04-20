@@ -7,6 +7,7 @@ env_wrappers: []
 
 alg_args:
   dqn:
+    wrapper: ["state_to_one_hot"]
     lr: 0.001
     epsilon_anneal_time: 20000
     buffer_size: 5000
@@ -14,6 +15,7 @@ alg_args:
     target_update_interval: 200
     hidden_size: 64
   reinforce:
+    wrapper: ["state_to_one_hot"]
     gamma: 1.0
     batch_size: 8
     buffer_size: 8

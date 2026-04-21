@@ -47,3 +47,9 @@ class BasicController:
 
     def cuda(self):
         self.agent.cuda()
+
+    def save_models(self, path):
+        self.agent.save_models(path)
+
+    def load_models(self, path):
+        self.agent.load_models(path)

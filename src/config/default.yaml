@@ -17,10 +17,15 @@ history_action_num: 0
 # Test arguments
 test_nepisode: 32
 test_interval: 5000
+render: False
+render_mode: "human"
 
 # Model load and save
 save_model: False
 save_model_interval: 0
+checkpoint_path: ""
+load_step: 0
+evaluate: False
 
 # device control
 device: "cuda"

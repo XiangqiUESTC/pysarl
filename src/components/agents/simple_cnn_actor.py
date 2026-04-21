@@ -91,3 +91,10 @@ class SimpleCNNActor(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return F.softmax(x, dim=-1)
+
+    def save_models(self, path):
+        torch.save(self.state_dict(), f"{path}/agent.th")
+
+    def load_models(self, path):
+        state_dict = torch.load(f"{path}/agent.th", map_location=torch.device("cpu"))
+        self.load_state_dict(state_dict)

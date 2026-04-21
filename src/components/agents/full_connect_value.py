@@ -54,3 +54,10 @@ class FullConnectedValue(nn.Module):
             return 1, 1
 
         raise NotImplementedError(f"Input space type {type(input_space)} is not supported.")
+
+    def save_models(self, path, model_name="critic.th"):
+        torch.save(self.state_dict(), f"{path}/{model_name}")
+
+    def load_models(self, path, model_name="critic.th"):
+        state_dict = torch.load(f"{path}/{model_name}", map_location=torch.device("cpu"))
+        self.load_state_dict(state_dict)

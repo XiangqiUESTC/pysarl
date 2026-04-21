@@ -44,3 +44,10 @@ class SimpleCritic(nn.Module):
             return 1, 1
 
         raise NotImplementedError(f"Input space type {type(input_space)} is not supported.")
+
+    def save_models(self, path):
+        torch.save(self.state_dict(), f"{path}/agent.th")
+
+    def load_models(self, path):
+        state_dict = torch.load(f"{path}/agent.th", map_location=torch.device("cpu"))
+        self.load_state_dict(state_dict)

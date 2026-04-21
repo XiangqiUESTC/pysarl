@@ -9,12 +9,13 @@ alg_args:
   dqn:
     wrapper: ["state_to_one_hot"]
     gamma: 1.0
-    lr: 0.0005
-    epsilon_anneal_time: 50000
-    sample_step_num: 64
-    max_buffer_steps: 20000
-    learning_starts: 2000
-    target_update_interval: 200
+    lr: 0.0003
+    epsilon_finish: 0.05
+    epsilon_anneal_time: 120000
+    sample_step_num: 128
+    max_buffer_steps: 50000
+    learning_starts: 5000
+    target_update_interval: 500
     hidden_size: 128
   reinforce:
     wrapper: ["state_to_one_hot"]

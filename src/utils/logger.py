@@ -1,9 +1,9 @@
 import logging
 from collections import defaultdict
 
-from torch.utils.tensorboard import SummaryWriter
 import os
-import datetime
+
+from torch.utils.tensorboard import SummaryWriter
 
 class MyLogger:
     def __init__(self, args, logger):
@@ -15,8 +15,7 @@ class MyLogger:
         self.stats = defaultdict(lambda: [])
 
     def setup_tensorboard(self, results_file):
-        time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.writer = SummaryWriter(log_dir=os.path.join(results_file, 'tb_logs', f"{self.args.name}-{time_str}"))
+        self.writer = SummaryWriter(log_dir=os.path.join(results_file, "tb_logs", self.args.run_name))
 
     def log_stats(self, key, value, step):
         # 记录key数据

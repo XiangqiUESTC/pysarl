@@ -85,6 +85,9 @@ class SerialRunner:
         step_transaction["filled"] = torch.tensor([1.0])
 
         next_state, reward, terminated, truncated, *_ = current_env.step(action.item())
+        if test_mode and getattr(current_env, "render_enabled", False):
+            current_env.render()
+
         reward_value = float(reward)
         self.current_total_reward += reward_value
 
@@ -113,7 +116,7 @@ class SerialRunner:
 
     def setup(self):
         self.env = env_REGISTRY[self.args.env](self.args)
-        self.test_env = env_REGISTRY[self.args.env](self.args)
+        self.test_env = env_REGISTRY[self.args.env](self.args, render=getattr(self.args, "render_test_env", False))
         self.env_scheme = self.env.get_scheme()
         self.controller = controller_REGISTRY[self.args.controller](self.args, self.env_scheme)
         self.buffer_scheme = self.controller.get_buffer_scheme()

@@ -1,6 +1,8 @@
 """
     一些工具函数
 """
+import datetime
+import re
 from collections.abc import Mapping
 from types import SimpleNamespace as sn
 
@@ -73,3 +75,20 @@ def get_space_shape_and_type(space):
         return space.shape, torch.float32
 
     raise NotImplementedError(f"Space type {type(space)} is not supported.")
+
+
+def build_run_name(base_name, game_name, alg_name, timestamp=None):
+    if timestamp is None:
+        timestamp = datetime.datetime.now()
+
+    short_time = timestamp.strftime("%y-%m-%d-%H-%M-%S")
+    normalized_base_name = _normalize_run_name_part(base_name)
+    normalized_game_name = _normalize_run_name_part(game_name)
+    normalized_alg_name = _normalize_run_name_part(alg_name)
+    return f"{normalized_base_name}-{normalized_game_name}-{normalized_alg_name}-{short_time}"
+
+
+def _normalize_run_name_part(value):
+    normalized_value = re.sub(r"\s+", "_", str(value).strip())
+    normalized_value = re.sub(r'[\\/:*?"<>|]+', "-", normalized_value)
+    return normalized_value or "unknown"

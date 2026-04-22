@@ -1,5 +1,6 @@
 import gymnasium as gym
 import torch
+from os.path import join
 
 
 class QTable:
@@ -37,3 +38,17 @@ class QTable:
         flat_state_indexes = state_indexes.reshape(-1)
         q_values = self.table[flat_state_indexes.long()]
         return q_values.reshape(*leading_shape, -1)
+
+    def parameters(self):
+        return [self.table]
+
+    def cuda(self):
+        self.table = self.table.cuda()
+
+    def save_models(self, path):
+        torch.save(self.table.detach().cpu(), join(path, "agent.th"))
+
+    def load_models(self, path):
+        device = self.table.device
+        loaded_table = torch.load(join(path, "agent.th"), map_location=torch.device("cpu"))
+        self.table = loaded_table.to(device).requires_grad_(True)

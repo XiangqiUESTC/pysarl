@@ -1,8 +1,6 @@
 game_name: "LunarLander-v3"
 max_episode_steps: 1000
 
-t_max: 400000
-
 env_wrappers: []
 
 alg_args:
@@ -13,10 +11,11 @@ alg_args:
     max_buffer_steps: 20000
     learning_starts: 2000
     target_update_interval: 200
+    t_max: 401100
   reinforce:
     sample_episode_num: 8
     max_buffer_episodes: 8
     lr: 0.0005
     critic_lr: 0.001
     hidden_size: 128
-    t_max: 400000
+    t_max: 401100

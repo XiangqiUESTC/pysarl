@@ -1,8 +1,6 @@
 game_name: "Taxi-v3"
 max_episode_steps: 200
 
-t_max: 150000
-
 env_wrappers: []
 
 alg_args:
@@ -17,6 +15,7 @@ alg_args:
     learning_starts: 5000
     target_update_interval: 500
     hidden_size: 128
+    t_max: 150300
   reinforce:
     wrapper: ["state_to_one_hot"]
     sample_episode_num: 16
@@ -25,3 +24,15 @@ alg_args:
     critic_lr: 0.001
     hidden_size: 128
     t_max: 200000
+  q_learning:
+    gamma: 1.0
+    lr: 0.3
+    epsilon_finish: 0.05
+    epsilon_anneal_time: 100000
+    t_max: 100300
+  sarsa:
+    gamma: 1.0
+    lr: 0.3
+    epsilon_finish: 0.05
+    epsilon_anneal_time: 100000
+    t_max: 100300

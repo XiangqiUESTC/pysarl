@@ -1,3 +1,6 @@
+from os.path import join
+
+import torch
 from torch import optim
 
 from components.agents import REGISTRY
@@ -26,7 +29,16 @@ class ActorCritic:
         self.critic.cuda()
 
     def save_models(self, path):
-        pass
+        self.runner.controller.save_models(path)
+        self.critic.save_models(path, model_name="critic.th")
+        torch.save(self.actor_optimizer.state_dict(), join(path, "actor_optimizer.th"))
+        torch.save(self.critic_optimizer.state_dict(), join(path, "critic_optimizer.th"))
 
     def load_models(self, path):
-        pass
+        self.runner.controller.load_models(path)
+        self.critic.load_models(path, model_name="critic.th")
+
+        actor_optimizer_state = torch.load(join(path, "actor_optimizer.th"), map_location=torch.device("cpu"))
+        critic_optimizer_state = torch.load(join(path, "critic_optimizer.th"), map_location=torch.device("cpu"))
+        self.actor_optimizer.load_state_dict(actor_optimizer_state)
+        self.critic_optimizer.load_state_dict(critic_optimizer_state)

@@ -1,5 +1,9 @@
 from copy import deepcopy
 
+from os.path import join
+
+import torch
+import torch.nn.functional as F
 from torch import optim
 
 
@@ -10,64 +14,52 @@ class DQN:
         self.logger = logger
 
         self.last_learn_t = 0
-        self.learning_starts = getattr(args, "learning_starts", args.batch_size)
+        self.learn_count = 0
+        self.learning_starts = getattr(args, "learning_starts", args.sample_step_num)
         self.learn_every_steps = getattr(args, "learn_every_steps", 1)
         self.target_update_interval = getattr(args, "target_update_interval", 1000)
 
         self.target_controller = deepcopy(self.runner.controller)
-        self.last_target_update_t = 0
 
         self.param = list(self.runner.controller.parameters())
         self.optimizer = optim.Adam(self.param, lr=self.args.lr)
 
     def can_learn(self):
-        has_enough_samples = self.runner.buffer.step_num >= self.learning_starts
+        has_enough_samples = self.runner.buffer.can_sample(
+            granularity="step",
+            sample_num=self.learning_starts,
+        )
         reaches_learn_interval = (self.runner.t_env - self.last_learn_t) >= self.learn_every_steps
         return has_enough_samples and reaches_learn_interval and self.runner.buffer.can_sample(granularity="step")
 
     def learn(self):
         batch = self.runner.buffer.sample(granularity="step")
 
-        done = batch["terminated"][:, 1:].float()
-        actions = batch["action"][:, :-1].long()
-        rewards = batch["reward"][:, :-1]
-        valid = batch["valid"][:, :-1]
+        actions = batch["action"][:, 0:1].long()
+        rewards = batch["reward"][:, 0:1]
+        done = batch["terminated"][:, 1:2].float()
 
-        qs = self.runner.controller.forward(batch)
-        online_q = qs[:, :-1]
+        online_q = self.runner.controller.forward(batch, t=0)
         chosen_action_q_val = online_q.gather(2, actions)
 
-        next_batch = {
-            key: value[:, 1:]
-            for key, value in batch.items()
-        }
-
-        if self.args.double_q:
-            next_online_q = qs[:, 1:]
-            next_actions = next_online_q.max(2)[1].unsqueeze(-1)
-            next_target_q = self.target_controller.forward(next_batch).detach()
-            max_next_q_value = next_target_q.gather(2, next_actions)
-        else:
-            target_q = self.target_controller.forward(next_batch).detach()
-            max_next_q_value = target_q.max(2)[0].unsqueeze(-1)
+        with torch.no_grad():
+            target_q = self.target_controller.forward(batch, t=1)
+            max_next_q_value = target_q.max(dim=2, keepdim=True)[0]
 
         td_target = rewards + self.args.gamma * max_next_q_value * (1 - done)
-        td_error = chosen_action_q_val - td_target
-        masked_td_error = td_error * valid
-
-        loss = (masked_td_error ** 2).sum() / valid.sum().clamp_min(1.0)
+        loss = F.mse_loss(chosen_action_q_val, td_target)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
         self.last_learn_t = self.runner.t_env
+        self.learn_count += 1
 
         self.logger.log_stats("loss", loss.item(), self.runner.t_env)
 
-        if (self.runner.t_env - self.last_target_update_t) >= self.target_update_interval:
+        if self.learn_count % self.target_update_interval == 0:
             self._update_target_network()
-            self.last_target_update_t = self.runner.t_env
 
     def _update_target_network(self):
         self.target_controller.agent.load_state_dict(self.runner.controller.agent.state_dict())
@@ -77,7 +69,14 @@ class DQN:
         self.target_controller.cuda()
 
     def save_models(self, path):
-        pass
+        self.runner.controller.save_models(path)
+        torch.save(self.target_controller.agent.state_dict(), join(path, "target_agent.th"))
+        torch.save(self.optimizer.state_dict(), join(path, "optimizer.th"))
 
     def load_models(self, path):
-        pass
+        self.runner.controller.load_models(path)
+        target_state_dict = torch.load(join(path, "target_agent.th"), map_location=torch.device("cpu"))
+        self.target_controller.agent.load_state_dict(target_state_dict)
+
+        optimizer_state_dict = torch.load(join(path, "optimizer.th"), map_location=torch.device("cpu"))
+        self.optimizer.load_state_dict(optimizer_state_dict)

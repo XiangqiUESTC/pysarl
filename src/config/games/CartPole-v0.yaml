@@ -1,8 +1,6 @@
 game_name: "CartPole-v0"
 max_episode_steps: 200
 
-t_max: 25000
-
 env_wrappers: []
 
 alg_args:
@@ -11,6 +9,7 @@ alg_args:
     epsilon_anneal_time: 2500
     sample_step_num: 64
     max_buffer_steps: 2000
+    t_max: 25300
   reinforce:
     sample_episode_num: 8
     max_buffer_episodes: 8
@@ -18,4 +17,4 @@ alg_args:
     critic_lr: 0.001
     hidden_size: 64
     value_train_iters: 10
-    t_max: 50000
+    t_max: 50300

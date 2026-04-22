@@ -16,6 +16,7 @@ history_action_num: 0
 
 # Test arguments
 test_nepisode: 32
+eval_nepisode: 10
 test_interval: 5000
 render: False
 render_mode: "human"
@@ -41,4 +42,3 @@ alg_env_wrappers: []
 env: "gym"
 game_name: "CartPole-v1"
 max_episode_steps: 500
-t_max: 200000

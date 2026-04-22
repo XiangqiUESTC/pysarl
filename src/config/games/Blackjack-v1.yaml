@@ -1,8 +1,6 @@
 game_name: "Blackjack-v1"
 max_episode_steps: 100
 
-t_max: 30000
-
 env_wrappers: []
 
 alg_args:
@@ -16,6 +14,7 @@ alg_args:
     learning_starts: 1000
     target_update_interval: 500
     hidden_size: 128
+    t_max: 30200
   reinforce:
     wrapper: ["state_to_one_hot"]
     gamma: 1.0
@@ -25,4 +24,4 @@ alg_args:
     max_buffer_episodes: 32
     lr: 0.001
     hidden_size: 64
-    t_max: 30000
+    t_max: 30200

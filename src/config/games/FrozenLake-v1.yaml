@@ -1,8 +1,6 @@
 game_name: "FrozenLake-v1"
 max_episode_steps: 100
 
-t_max: 100000
-
 env_wrappers: []
 
 alg_args:
@@ -15,6 +13,7 @@ alg_args:
     learning_starts: 500
     target_update_interval: 200
     hidden_size: 64
+    t_max: 100000
   reinforce:
     wrapper: ["state_to_one_hot"]
     sample_episode_num: 32
@@ -23,3 +22,15 @@ alg_args:
     critic_lr: 0.001
     hidden_size: 64
     t_max: 150000
+  q_learning:
+    gamma: 0.99
+    lr: 0.2
+    epsilon_finish: 0.05
+    epsilon_anneal_time: 50000
+    t_max: 120000
+  sarsa:
+    gamma: 0.99
+    lr: 0.2
+    epsilon_finish: 0.05
+    epsilon_anneal_time: 50000
+    t_max: 120000

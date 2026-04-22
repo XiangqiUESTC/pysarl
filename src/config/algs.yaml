@@ -17,6 +17,7 @@ actor_critic:
 
 dqn:
   runner: "serial"
+  t_max: 200000
 
   controller: "basic_controller"
   buffer: "basic_buffer"
@@ -39,16 +40,20 @@ dqn:
   learn_every_steps: 1
 
 q_learning:
+  runner: "serial"
   controller: "basic_controller"
-  critic: "q_table"
+  buffer: "basic_buffer"
+  learner: "q_learning"
+
+  t_max: 200000
+  max_buffer_steps: 1
   q_init_val: 0.0
+  agent: "q_table"
+  gamma: 0.99
   action_selector: "epsilon_greedy"
   epsilon_start: 1.0
   epsilon_finish: 0.05
   epsilon_anneal_time: 50000
-
-  runner: "default"
-  agent_out_put_type: "value"
 
 reinforce:
   runner: "serial"
@@ -76,13 +81,17 @@ reinforce:
   formula: 3
 
 sarsa:
+  runner: "serial"
   controller: "basic_controller"
-  critic: "q_table"
+  buffer: "basic_buffer"
+  learner: "sarsa"
+
+  t_max: 200000
+  max_buffer_steps: 1
   q_init_val: 0.0
+  agent: "q_table"
+  gamma: 0.99
   action_selector: "epsilon_greedy"
   epsilon_start: 1.0
   epsilon_finish: 0.05
   epsilon_anneal_time: 50000
-
-  runner: "default"
-  agent_out_put_type: "value"

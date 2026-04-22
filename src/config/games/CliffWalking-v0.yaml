@@ -1,8 +1,6 @@
 game_name: "CliffWalking-v0"
 max_episode_steps: 100
 
-t_max: 80000
-
 env_wrappers: []
 
 alg_args:
@@ -15,6 +13,7 @@ alg_args:
     learning_starts: 500
     target_update_interval: 200
     hidden_size: 64
+    t_max: 80000
   reinforce:
     wrapper: ["state_to_one_hot"]
     gamma: 1.0
@@ -25,3 +24,15 @@ alg_args:
     hidden_size: 128
     value_train_iters: 20
     t_max: 100000
+  q_learning:
+    gamma: 1.0
+    lr: 0.5
+    epsilon_finish: 0.01
+    epsilon_anneal_time: 20000
+    t_max: 30000
+  sarsa:
+    gamma: 1.0
+    lr: 0.5
+    epsilon_finish: 0.01
+    epsilon_anneal_time: 20000
+    t_max: 30000

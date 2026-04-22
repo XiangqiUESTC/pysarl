@@ -14,7 +14,7 @@ dtype_dict = {
 
 
 class Gym(gym.Env):
-    def __init__(self,args):
+    def __init__(self,args, render=False):
         """
             初始化方法
         """
@@ -22,14 +22,20 @@ class Gym(gym.Env):
         self.game_name = args.game_name
         self.device = args.device
         self.dtype = dtype_dict[args.dtype]
+        self.render_enabled = render
+        self.render_mode = getattr(args, "render_mode", "human")
+        make_kwargs = {}
+
+        if self.render_enabled:
+            make_kwargs["render_mode"] = self.render_mode
 
         # 注册游戏并添加wrapper
         if self.game_name.startswith("ALE/"):
             import ale_py
             gym.register_envs(ale_py)
-            game = gym.make(self.game_name)
+            game = gym.make(self.game_name, **make_kwargs)
         else:
-            game = gym.make(self.game_name)
+            game = gym.make(self.game_name, **make_kwargs)
 
         max_episode_steps = args.max_episode_steps
         game = TimeLimit(game, max_episode_steps=max_episode_steps)
@@ -121,7 +127,7 @@ class Gym(gym.Env):
         return self._state
 
     def render(self):
-        pass
+        return self.game.render()
 
     def close(self):
-        pass
+        self.game.close()

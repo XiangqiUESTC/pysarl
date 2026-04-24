@@ -25,3 +25,17 @@ alg_args:
     lr: 0.001
     hidden_size: 64
     t_max: 30200
+  q_learning:
+    wrapper: ["state_to_discrete_index"]
+    gamma: 1.0
+    lr: 0.005
+    epsilon_finish: 0.1
+    epsilon_anneal_time: 150000
+    t_max: 200000
+  sarsa:
+    wrapper: ["state_to_discrete_index"]
+    gamma: 1.0
+    lr: 0.002
+    epsilon_finish: 0.1
+    epsilon_anneal_time: 200000
+    t_max: 200000

@@ -23,15 +23,16 @@ alg_args:
     hidden_size: 128
     t_max: 200000
   q_learning:
+    gamma: 0.99
+    lr: 0.1
+    q_init_val: 0.0
+    epsilon_finish: 0.01
+    epsilon_anneal_time: 500000
+    t_max: 300000
+  sarsa:
     gamma: 1.0
     lr: 0.1
     q_init_val: 1.0
     epsilon_finish: 0.01
     epsilon_anneal_time: 500000
-    t_max: 1000000
-  sarsa:
-    gamma: 0.99
-    lr: 0.2
-    epsilon_finish: 0.05
-    epsilon_anneal_time: 100000
-    t_max: 250000
+    t_max: 450000

@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .nn_utils import get_input_tensor
+from .nn_utils import get_module_device
+
 
 class SimpleActor(nn.Module):
     """
@@ -28,8 +31,9 @@ class SimpleActor(nn.Module):
         self.fc3 = nn.Linear(args.hidden_size, action_size)
 
     def forward(self, batch, t=None):
-        states = batch["input"] if t is None else batch["input"][:, t:t + 1]
-        flat_states = torch.flatten(states.float(), start_dim=-self.input_dim)
+        device = get_module_device(self)
+        states = get_input_tensor(batch, t, device)
+        flat_states = torch.flatten(states, start_dim=-self.input_dim)
 
         x = F.relu(self.fc1(flat_states))
         x = F.relu(self.fc2(x))

@@ -8,7 +8,7 @@ class PolicyDistribution:
     def select_action(self, agent_output, t_env, t, test_mode=False):
         self.agent_output = agent_output
 
-        if test_mode:
+        if test_mode and not getattr(self.args, "test_sample_policy", False):
             actions = agent_output.max(-1)[1]
         else:
             action_dist = torch.distributions.Categorical(agent_output)

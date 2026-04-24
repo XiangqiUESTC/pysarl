@@ -24,18 +24,15 @@ class Gym(gym.Env):
         self.dtype = dtype_dict[args.dtype]
         self.render_enabled = render
         self.render_mode = getattr(args, "render_mode", "human")
-        make_kwargs = {}
+        make_kwargs = self._build_make_kwargs()
 
-        if self.render_enabled:
+        if self.render_enabled and "render_mode" not in make_kwargs:
             make_kwargs["render_mode"] = self.render_mode
 
+        self._try_register_ale_envs()
+
         # 注册游戏并添加wrapper
-        if self.game_name.startswith("ALE/"):
-            import ale_py
-            gym.register_envs(ale_py)
-            game = gym.make(self.game_name, **make_kwargs)
-        else:
-            game = gym.make(self.game_name, **make_kwargs)
+        game = gym.make(self.game_name, **make_kwargs)
 
         max_episode_steps = args.max_episode_steps
         game = TimeLimit(game, max_episode_steps=max_episode_steps)
@@ -131,3 +128,25 @@ class Gym(gym.Env):
 
     def close(self):
         self.game.close()
+
+    def _try_register_ale_envs(self):
+        try:
+            import ale_py
+        except ImportError:
+            return
+
+        gym.register_envs(ale_py)
+
+    def _build_make_kwargs(self):
+        raw_make_kwargs = getattr(self.args, "make_kwargs", None)
+
+        if raw_make_kwargs is None:
+            return {}
+
+        if isinstance(raw_make_kwargs, dict):
+            return dict(raw_make_kwargs)
+
+        if hasattr(raw_make_kwargs, "__dict__"):
+            return vars(raw_make_kwargs).copy()
+
+        raise TypeError(f"Unsupported make_kwargs type: {type(raw_make_kwargs)}")

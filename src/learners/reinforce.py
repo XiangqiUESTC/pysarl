@@ -4,6 +4,7 @@ import torch
 from torch import optim
 
 from components.agents import REGISTRY
+from utils.functions import move_batch_to_device
 
 
 class Reinforce:
@@ -25,6 +26,7 @@ class Reinforce:
 
     def learn(self):
         batch = self.runner.buffer.sample(granularity="episode")
+        batch = move_batch_to_device(batch, self.args.device)
 
         action = batch["action"][:, :-1]
         reward = batch["reward"][:, :-1]

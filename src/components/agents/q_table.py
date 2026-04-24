@@ -24,7 +24,7 @@ class QTable:
         self.table = torch.full(
             (state_size, action_size),
             args.q_init_val,
-            requires_grad=True,
+            requires_grad=False,
             dtype=torch.float64,
         )
 
@@ -51,4 +51,4 @@ class QTable:
     def load_models(self, path):
         device = self.table.device
         loaded_table = torch.load(join(path, "agent.th"), map_location=torch.device("cpu"))
-        self.table = loaded_table.to(device).requires_grad_(True)
+        self.table = loaded_table.to(device).requires_grad_(False)

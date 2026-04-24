@@ -1,5 +1,5 @@
 game_name: "Pong-v4"
-max_episode_steps: 2000
+max_episode_steps: 20000
 env_wrappers: []
 
 alg_args:

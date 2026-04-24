@@ -1,5 +1,5 @@
 game_name: "PongNoFrameskip-v4"
-max_episode_steps: 10000
+max_episode_steps: 20000
 env_wrappers: []
 
 alg_args:

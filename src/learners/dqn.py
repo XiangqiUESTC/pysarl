@@ -6,6 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch import optim
 
+from utils.functions import move_batch_to_device
+
 
 class DQN:
     def __init__(self, args, runner, logger):
@@ -34,6 +36,7 @@ class DQN:
 
     def learn(self):
         batch = self.runner.buffer.sample(granularity="step")
+        batch = move_batch_to_device(batch, self.args.device)
 
         actions = batch["action"][:, 0:1].long()
         rewards = batch["reward"][:, 0:1]

@@ -92,3 +92,15 @@ def _normalize_run_name_part(value):
     normalized_value = re.sub(r"\s+", "_", str(value).strip())
     normalized_value = re.sub(r'[\\/:*?"<>|]+', "-", normalized_value)
     return normalized_value or "unknown"
+
+
+def move_batch_to_device(batch, device):
+    moved_batch = {}
+
+    for key, value in batch.items():
+        if torch.is_tensor(value):
+            moved_batch[key] = value.to(device)
+        else:
+            moved_batch[key] = value
+
+    return moved_batch

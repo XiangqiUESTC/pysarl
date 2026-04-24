@@ -80,7 +80,6 @@ def training(args, logger):
     finish_train = False
     last_test_t = runner.t_env
     last_save_t = runner.t_env
-
     while runner.t_env <= args.t_max:
         runner.step()
 
@@ -98,6 +97,7 @@ def training(args, logger):
             mean_test_return = sum(test_returns) / len(test_returns)
             logger.log_stats("test_return_mean", mean_test_return, runner.t_env)
             logger.logger.info(f"Test t_env: {runner.t_env:>10} test_return_mean: {mean_test_return:.2f}")
+
             last_test_t = runner.t_env
 
         if args.save_model and args.save_model_interval != 0 and (runner.t_env - last_save_t) / args.save_model_interval >= 1.0:
@@ -118,8 +118,10 @@ def evaluate_only(args, runner, logger):
     runner.start_test_phase()
     test_returns = []
 
-    for _ in range(n_test_runs):
-        test_returns.append(runner.run(test_mode=True))
+    for i in range(n_test_runs):
+        total_reward = runner.run(test_mode=True)
+        logger.logger.info(f"第{i+1}次评估，回报为{total_reward}")
+        test_returns.append(total_reward)
 
     mean_test_return = sum(test_returns) / len(test_returns)
     logger.logger.info(f"Evaluate only test_return_mean: {mean_test_return:.2f}")

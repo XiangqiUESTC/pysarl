@@ -3,6 +3,9 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from .nn_utils import get_input_tensor
+from .nn_utils import get_module_device
+
 
 class FullConnectedValue(nn.Module):
     """
@@ -36,8 +39,9 @@ class FullConnectedValue(nn.Module):
                 self.linear_layers.append(nn.Linear(hidden_dim, hidden_dim))
 
     def forward(self, batch, t=None):
-        x = batch["input"] if t is None else batch["input"][:, t:t + 1]
-        x = torch.flatten(x.float(), start_dim=-self.input_dim)
+        device = get_module_device(self)
+        x = get_input_tensor(batch, t, device)
+        x = torch.flatten(x, start_dim=-self.input_dim)
 
         for layer_index, layer in enumerate(self.linear_layers):
             x = layer(x)

@@ -46,6 +46,7 @@ q_learning:
   learner: "q_learning"
 
   t_max: 200000
+  batch_update: false
   max_buffer_steps: 1
   q_init_val: 0.0
   agent: "q_table"
@@ -87,6 +88,7 @@ sarsa:
   learner: "sarsa"
 
   t_max: 200000
+  batch_update: false
   max_buffer_steps: 1
   q_init_val: 0.0
   agent: "q_table"

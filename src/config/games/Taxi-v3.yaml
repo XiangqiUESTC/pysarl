@@ -31,8 +31,8 @@ alg_args:
     epsilon_anneal_time: 100000
     t_max: 100300
   sarsa:
-    gamma: 1.0
-    lr: 0.3
+    gamma: 0.99
+    lr: 0.2
     epsilon_finish: 0.05
-    epsilon_anneal_time: 100000
-    t_max: 100300
+    epsilon_anneal_time: 200000
+    t_max: 500300

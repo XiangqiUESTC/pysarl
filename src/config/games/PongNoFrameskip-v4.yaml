@@ -1,0 +1,42 @@
+game_name: "PongNoFrameskip-v4"
+max_episode_steps: 10000
+env_wrappers: []
+
+alg_args:
+  dqn:
+    wrapper: ["atari_noop_reset", "pong_minimal_actions", "atari_frame_skip_max", "pong_preprocess"]
+    agent: "simple_cnn_critic"
+    history_frame_num: 3
+    hidden_size: 512
+    lr: 0.0001
+    gamma: 0.99
+    epsilon_finish: 0.02
+    epsilon_anneal_time: 120000
+    sample_step_num: 64
+    max_buffer_steps: 10000
+    learning_starts: 5000
+    learn_every_steps: 4
+    target_update_interval: 1000
+    buffer_device: "cpu"
+    t_max: 300000
+    test_interval: 10000
+  reinforce:
+    wrapper: ["atari_noop_reset", "pong_minimal_actions", "atari_frame_skip_max", "pong_preprocess"]
+    agent: "simple_cnn_actor"
+    history_frame_num: 1
+    hidden_size: 256
+    gamma: 0.99
+    baseline: true
+    formula: 3
+    lr: 0.0002
+    critic_lr: 0.0005
+    value_train_iters: 4
+    sample_episode_num: 4
+    max_buffer_episodes: 4
+    test_sample_policy: true
+    buffer_device: "cpu"
+    critic:
+      name: "simple_cnn_value"
+      hidden_dim: 256
+    t_max: 300000
+    test_interval: 10000

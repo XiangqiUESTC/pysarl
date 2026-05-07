@@ -5,7 +5,7 @@ Pysarl框架，全称Python Single Agent Reinforcement Learning，是基于pytor
 使用命令
 
 ```python 
-    python src/main.py with alg=dqn env_args.gamename=CartPole-v1
+    python src/main.py with alg=dqn gamename=CartPole-v1
 ```
 
 ## SACRED库和args全局配置变量
